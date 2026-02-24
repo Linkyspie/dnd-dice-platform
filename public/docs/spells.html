@@ -1,0 +1,1606 @@
+<!DOCTYPE html>
+<html lang="ru">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>D&D Spell Compendium</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+        }
+
+        :root {
+            --primary: #2c3e50;
+            --secondary: #3498db;
+            --accent: #e74c3c;
+            --light: #ecf0f1;
+            --dark: #2c3e50;
+            --damage: #e74c3c;
+            --status: #f39c12;
+            --buff: #2ecc71;
+            --blood: #8e44ad;
+            --qol: #1abc9c;
+            --grav: #34495e;
+        }
+
+        body {
+            background: linear-gradient(135deg, #1a2a3a, #2c3e50);
+            color: var(--light);
+            min-height: 100vh;
+            padding: 20px;
+        }
+
+        .container {
+            max-width: 1400px;
+            margin: 0 auto;
+        }
+
+        header {
+            text-align: center;
+            padding: 20px 0;
+            margin-bottom: 30px;
+            background: rgba(0, 0, 0, 0.3);
+            border-radius: 15px;
+            box-shadow: 0 8px 32px rgba(0, 0, 0, 0.3);
+            backdrop-filter: blur(10px);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+        }
+
+        h1 {
+            font-size: 3.5rem;
+            margin-bottom: 10px;
+            text-shadow: 0 0 10px rgba(52, 152, 219, 0.7);
+            background: linear-gradient(to right, #3498db, #2ecc71, #e74c3c);
+            -webkit-background-clip: text;
+            background-clip: text;
+            color: transparent;
+        }
+
+        .subtitle {
+            font-size: 1.2rem;
+            opacity: 0.8;
+            margin-bottom: 20px;
+        }
+
+        .controls {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 15px;
+            justify-content: center;
+            margin-bottom: 30px;
+            padding: 20px;
+            background: rgba(0, 0, 0, 0.2);
+            border-radius: 10px;
+        }
+
+        .search-box {
+            position: relative;
+            width: 100%;
+            max-width: 500px;
+        }
+
+        .search-box input {
+            width: 100%;
+            padding: 12px 20px 12px 45px;
+            border-radius: 30px;
+            border: none;
+            background: rgba(255, 255, 255, 0.1);
+            color: white;
+            font-size: 1rem;
+            box-shadow: 0 4px 15px rgba(0, 0, 0, 0.2);
+        }
+
+        .search-box i {
+            position: absolute;
+            left: 15px;
+            top: 50%;
+            transform: translateY(-50%);
+            color: #bbb;
+        }
+
+        .filters {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 10px;
+            justify-content: center;
+        }
+
+        .filter-btn {
+            padding: 10px 20px;
+            border-radius: 30px;
+            border: none;
+            background: rgba(255, 255, 255, 0.1);
+            color: white;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            font-weight: 500;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .filter-btn:hover {
+            background: rgba(255, 255, 255, 0.2);
+            transform: translateY(-2px);
+        }
+
+        .filter-btn.active {
+            background: var(--secondary);
+            box-shadow: 0 0 15px rgba(52, 152, 219, 0.5);
+        }
+
+        .spells-container {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(350px, 1fr));
+            gap: 25px;
+            padding: 10px;
+        }
+
+        .spell-card {
+            background: rgba(30, 40, 50, 0.8);
+            border-radius: 15px;
+            overflow: hidden;
+            box-shadow: 0 10px 20px rgba(0, 0, 0, 0.3);
+            transition: all 0.3s ease;
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            display: flex;
+            flex-direction: column;
+            height: 100%;
+        }
+
+        .spell-card:hover {
+            transform: translateY(-10px);
+            box-shadow: 0 15px 30px rgba(0, 0, 0, 0.4);
+            border-color: rgba(52, 152, 219, 0.5);
+        }
+
+        .card-header {
+            padding: 20px;
+            background: rgba(0, 0, 0, 0.3);
+            border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+        }
+
+        .spell-name {
+            font-size: 1.5rem;
+            font-weight: 700;
+            margin-bottom: 10px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .spell-type {
+            font-size: 0.8rem;
+            padding: 4px 10px;
+            border-radius: 20px;
+            font-weight: bold;
+        }
+
+        .damage {
+            background: var(--damage);
+        }
+
+        .status {
+            background: var(--status);
+        }
+
+        .buff {
+            background: var(--buff);
+        }
+
+        .blood {
+            background: var(--blood);
+        }
+
+        .qol {
+            background: var(--qol);
+        }
+
+        .grav {
+            background: var(--grav);
+        }
+
+        .spell-details {
+            padding: 20px;
+            flex-grow: 1;
+            display: flex;
+            flex-direction: column;
+            gap: 15px;
+        }
+
+        .detail-item {
+            display: flex;
+            gap: 10px;
+        }
+
+        .detail-label {
+            font-weight: 600;
+            min-width: 120px;
+            color: #3498db;
+        }
+
+        .detail-value {
+            flex: 1;
+        }
+
+        .effect {
+            line-height: 1.6;
+        }
+
+        .check-effect {
+            background: rgba(0, 0, 0, 0.3);
+            padding: 15px;
+            border-radius: 10px;
+            margin-top: 10px;
+        }
+
+        .critical-effect {
+            color: #f1c40f;
+            font-style: italic;
+            margin-top: 10px;
+            padding: 10px;
+            border-left: 3px solid #f1c40f;
+        }
+
+        .failure-effect {
+            color: #e74c3c;
+            font-style: italic;
+            margin-top: 10px;
+            padding: 10px;
+            border-left: 3px solid #e74c3c;
+        }
+
+        .blood-cost,
+        .penalty {
+            display: inline-block;
+            padding: 3px 8px;
+            border-radius: 5px;
+            font-weight: bold;
+            margin-left: 5px;
+        }
+
+        .blood-cost {
+            background: rgba(142, 68, 173, 0.3);
+            color: #8e44ad;
+        }
+
+        .penalty {
+            background: rgba(231, 76, 60, 0.3);
+            color: #e74c3c;
+        }
+
+        .no-results {
+            grid-column: 1 / -1;
+            text-align: center;
+            padding: 50px;
+            font-size: 1.5rem;
+            color: #bbb;
+        }
+
+        footer {
+            text-align: center;
+            padding: 30px 0;
+            margin-top: 30px;
+            color: #bbb;
+            font-size: 0.9rem;
+        }
+
+        @media (max-width: 768px) {
+            .spells-container {
+                grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+            }
+
+            h1 {
+                font-size: 2.5rem;
+            }
+
+            .controls {
+                flex-direction: column;
+                align-items: center;
+            }
+
+            .search-box {
+                max-width: 100%;
+            }
+        }
+    </style>
+</head>
+
+<body>
+    <div class="container">
+        <header>
+            <h1><i class="fas fa-book-spells"></i> Spell Compendium</h1>
+        </header>
+
+        <div class="controls">
+            <div class="search-box">
+                <i class="fas fa-search"></i>
+                <input type="text" id="searchInput" placeholder="Поиск заклинаний...">
+            </div>
+
+            <div class="filters">
+                <button class="filter-btn active" data-filter="all"><i class="fas fa-globe"></i> Все</button>
+                <button class="filter-btn" data-filter="damage"><i class="fas fa-fire"></i> Урон</button>
+                <button class="filter-btn" data-filter="status"><i class="fas fa-skull"></i> Состояния</button>
+                <button class="filter-btn" data-filter="buff"><i class="fas fa-shield-alt"></i> Бафы</button>
+                <button class="filter-btn" data-filter="blood"><i class="fas fa-tint"></i> Кровь</button>
+                <button class="filter-btn" data-filter="qol"><i class="fas fa-campground"></i> QoL</button>
+                <button class="filter-btn" data-filter="grav"><i class="fas fa-weight-hanging"></i> Гравитация</button>
+            </div>
+        </div>
+
+        <div class="spells-container" id="spellsContainer">
+            <!-- Spells will be dynamically inserted here -->
+        </div>
+
+        <footer>
+            <p>Нахуй ты это читаешь?</p>
+        </footer>
+    </div>
+
+    <script>
+        // Augment spell data with additional properties
+        function augmentSpellData(spells) {
+            return spells.map(spell => {
+                // Determine spell category based on ID prefix
+                let category = 'other';
+                if (spell.id.startsWith('damage')) category = 'damage';
+                else if (spell.id.startsWith('status')) category = 'status';
+                else if (spell.id.startsWith('buff')) category = 'buff';
+                else if (spell.id.startsWith('blood')) category = 'blood';
+                else if (spell.id.startsWith('QOL')) category = 'qol';
+                else if (spell.id.startsWith('GRAV')) category = 'grav';
+
+                // Add category property
+                spell.category = category;
+
+                // Add localized category names
+                const categoryNames = {
+                    'damage': 'Урон',
+                    'status': 'Состояния',
+                    'buff': 'Бафы',
+                    'blood': 'Кровь',
+                    'qol': 'QoL',
+                    'grav': 'Гравитация',
+                    'other': 'Другое'
+                };
+                spell.categoryName = categoryNames[category];
+
+                // Add CSS class for styling
+                spell.typeClass = category;
+
+                // Format cost for display
+                spell.costDisplay = spell.cost.includes('слот') ? spell.cost : `${spell.cost} слот${getSlotEnding(spell.cost)}`;
+
+                // Add blood cost indicator
+                spell.hasBloodCost = spell.blood_cost && spell.blood_cost !== '0' && spell.blood_cost !== '';
+
+                // Add penalty indicator
+                spell.hasPenalty = spell.penalty && spell.penalty !== '0' && spell.penalty !== '' && spell.penalty !== 'Нет';
+
+                return spell;
+            });
+        }
+
+        // Helper function to get Russian slot ending
+        function getSlotEnding(count) {
+            const num = parseInt(count);
+            if (isNaN(num)) return '';
+
+            const lastDigit = num % 10;
+            const lastTwoDigits = num % 100;
+
+            if (lastTwoDigits >= 11 && lastTwoDigits <= 19) {
+                return 'ов';
+            } else if (lastDigit === 1) {
+                return '';
+            } else if (lastDigit >= 2 && lastDigit <= 4) {
+                return 'а';
+            } else {
+                return 'ов';
+            }
+        }
+
+        // Render spells to the page
+        function renderSpells(spells) {
+            const container = document.getElementById('spellsContainer');
+            container.innerHTML = '';
+
+            if (spells.length === 0) {
+                container.innerHTML = '<div class="no-results">Ничего не найдено. Попробуйте другой запрос.</div>';
+                return;
+            }
+
+            spells.forEach(spell => {
+                const card = document.createElement('div');
+                card.className = 'spell-card';
+                card.dataset.category = spell.category;
+
+                card.innerHTML = `
+            <div class="card-header">
+                <div class="spell-name">
+                    ${spell.name}
+                    <span class="spell-type ${spell.typeClass}">${spell.categoryName}</span>
+                </div>
+            </div>
+            <div class="spell-details">
+                <div class="detail-item">
+                    <span class="detail-label">Стоимость:</span>
+                    <span class="detail-value">${spell.costDisplay}</span>
+                </div>
+                <div class="detail-item">
+                    <span class="detail-label">Время:</span>
+                    <span class="detail-value">${spell.casting_time}</span>
+                </div>
+                <div class="detail-item">
+                    <span class="detail-label">Длительность:</span>
+                    <span class="detail-value">${spell.duration}</span>
+                </div>
+                <div class="detail-item">
+                    <span class="detail-label">Эффект:</span>
+                    <span class="detail-value effect">${spell.effect}</span>
+                </div>
+                
+                ${spell.check_type && spell.check_type !== 'Нет' ? `
+                <div class="detail-item">
+                    <span class="detail-label">Проверка:</span>
+                    <span class="detail-value">${spell.check_type}</span>
+                </div>
+                ` : ''}
+                
+                ${spell.check_effect && spell.check_effect !== 'Нет' && spell.check_effect !== 'Не требует проверки' ? `
+                <div class="check-effect">${spell.check_effect}</div>
+                ` : ''}
+                
+                ${spell.critical_effect && spell.critical_effect !== 'Нет' ? `
+                <div class="critical-effect">
+                    <strong>Критический эффект:</strong> ${spell.critical_effect}
+                </div>
+                ` : ''}
+                
+                ${spell.failure_effect && spell.failure_effect !== 'Нет' ? `
+                <div class="failure-effect">
+                    <strong>Провал:</strong> ${spell.failure_effect}
+                </div>
+                ` : ''}
+                
+                ${spell.hasBloodCost ? `
+                <div class="detail-item">
+                    <span class="detail-label">Цена крови:</span>
+                    <span class="detail-value"><span class="blood-cost">${spell.blood_cost} HP</span></span>
+                </div>
+                ` : ''}
+                
+                ${spell.hasPenalty ? `
+                <div class="detail-item">
+                    <span class="detail-label">Штраф:</span>
+                    <span class="detail-value"><span class="penalty">${spell.penalty}</span></span>
+                </div>
+                ` : ''}
+            </div>
+        `;
+
+                container.appendChild(card);
+            });
+        }
+
+        // Filter spells based on search and category
+        function filterSpells(spells, searchTerm, categoryFilter) {
+            return spells.filter(spell => {
+                // Category filter
+                if (categoryFilter !== 'all' && spell.category !== categoryFilter) {
+                    return false;
+                }
+
+                // Search term filter
+                if (searchTerm) {
+                    const lowerSearch = searchTerm.toLowerCase();
+                    return (
+                        spell.name.toLowerCase().includes(lowerSearch) ||
+                        spell.effect.toLowerCase().includes(lowerSearch) ||
+                        spell.check_type.toLowerCase().includes(lowerSearch) ||
+                        spell.check_effect.toLowerCase().includes(lowerSearch) ||
+                        spell.critical_effect.toLowerCase().includes(lowerSearch) ||
+                        spell.failure_effect.toLowerCase().includes(lowerSearch)
+                    );
+                }
+
+                return true;
+            });
+        }
+
+        // Set up event listeners
+        function setupEventListeners(spells) {
+            const searchInput = document.getElementById('searchInput');
+            const filterButtons = document.querySelectorAll('.filter-btn');
+
+            // Search input handler
+            searchInput.addEventListener('input', () => {
+                const searchTerm = searchInput.value.trim();
+                const activeFilter = document.querySelector('.filter-btn.active').dataset.filter;
+                const filteredSpells = filterSpells(spells, searchTerm, activeFilter);
+                renderSpells(filteredSpells);
+            });
+
+            // Filter button handlers
+            filterButtons.forEach(button => {
+                button.addEventListener('click', () => {
+                    // Update active button
+                    filterButtons.forEach(btn => btn.classList.remove('active'));
+                    button.classList.add('active');
+
+                    // Filter spells
+                    const categoryFilter = button.dataset.filter;
+                    const searchTerm = searchInput.value.trim();
+                    const filteredSpells = filterSpells(spells, searchTerm, categoryFilter);
+                    renderSpells(filteredSpells);
+                });
+            });
+        }
+
+        // Initialize the application
+        document.addEventListener('DOMContentLoaded', () => {
+            // In a real implementation, we would fetch the JSON data
+            // For this example, we'll use the provided data array
+
+            // Since we can't include the full data array due to length limits,
+            // I'll demonstrate with a small sample:
+            const sampleSpells = [
+                {
+                    "id": "damage_1",
+                    "name": "Огненный шар",
+                    "cost": "2",
+                    "casting_time": "1",
+                    "duration": "Мгновенно",
+                    "effect": "В точке в пределах дистанции взрывается сфера огня радиусом 6 метров. Все существа в зоне получают урон 3d6 + МС огнём.",
+                    "check_type": "Спасбросок Ловкости",
+                    "check_effect": "При успехе: половина урона",
+                    "critical_effect": "Максимальный урон (18 + МС)",
+                    "failure_effect": "Заклинание провалено, ячейка потрачена",
+                    "blood_cost": "",
+                    "penalty": ""
+                },
+                {
+                    "id": "damage_2",
+                    "name": "Молния",
+                    "cost": "2",
+                    "casting_time": "1",
+                    "duration": "Мгновенно",
+                    "effect": "Молния длиной 30м и шириной 1.5м поражает всех существ на линии. Урон: 4d6 + МС электричеством.",
+                    "check_type": "Спасбросок Ловкости",
+                    "check_effect": "При успехе: половина урона",
+                    "critical_effect": "Максимальный урон (24 + МС) и цель парализована до конца своего следующего хода",
+                    "failure_effect": "Заклинание провалено, ячейка потрачена",
+                    "blood_cost": "",
+                    "penalty": ""
+                },
+                {
+                    "id": "damage_3",
+                    "name": "Ледяное копье",
+                    "cost": "1",
+                    "casting_time": "1",
+                    "duration": "Мгновенно + 1 ход",
+                    "effect": "Копьё из льда наносит 2d6 + МС урона холодом и снижает скорость цели на 6м до конца её следующего хода.",
+                    "check_type": "Бросок атаки заклинанием",
+                    "check_effect": "Попадание: полный урон и эффект",
+                    "critical_effect": "Скорость цели снижается до 0 на 1 ход",
+                    "failure_effect": "Заклинание провалено, ячейка потрачена",
+                    "blood_cost": "",
+                    "penalty": ""
+                },
+                {
+                    "id": "damage_4",
+                    "name": "Кислотный спрей",
+                    "cost": "1",
+                    "casting_time": "1",
+                    "duration": "Мгновенно + 3 хода",
+                    "effect": "Конус кислоты наносит 2d6 + МС урона сразу и 1d6 урона в начале каждого хода цели в течение 3 ходов.",
+                    "check_type": "Спасбросок Ловкости",
+                    "check_effect": "Успех: только начальный урон, провал: начальный + периодический урон",
+                    "critical_effect": "Периодический урон увеличивается до 2d6",
+                    "failure_effect": "Заклинание провалено, ячейка потрачена",
+                    "blood_cost": "",
+                    "penalty": ""
+                },
+                {
+                    "id": "damage_5",
+                    "name": "Элдритч Бласт",
+                    "cost": "2",
+                    "casting_time": "1",
+                    "duration": "Мгновенно",
+                    "effect": "Луч силовой энергии наносит 4d8 + МС урона и отталкивает цель на 3 метра.",
+                    "check_type": "Бросок атаки заклинанием",
+                    "check_effect": "Попадание: полный урон и отталкивание",
+                    "critical_effect": "Цель отталкивается на 6 метров и падает ничком",
+                    "failure_effect": "Заклинание провалено, ячейка потрачена",
+                    "blood_cost": "",
+                    "penalty": ""
+                },
+                {
+                    "id": "damage_6",
+                    "name": "Ледяная вспышка",
+                    "cost": "1",
+                    "casting_time": "1",
+                    "duration": "Мгновенно + 1 ход",
+                    "effect": "Ледяная волна наносит 2d4 + МС урона холодом всем существам в радиусе.",
+                    "check_type": "Спасбросок Телосложения",
+                    "check_effect": "Успех: только урон, провал: урон + заморозка (пропуск следующего хода)",
+                    "critical_effect": "Цели заморожены на 2 хода",
+                    "failure_effect": "Заклинание провалено, ячейка потрачена",
+                    "blood_cost": "",
+                    "penalty": ""
+                },
+                {
+                    "id": "damage_7",
+                    "name": "Волшебная стрела",
+                    "cost": "1",
+                    "casting_time": "1",
+                    "duration": "Мгновенно",
+                    "effect": "Создаёт 3 стрелы магии, каждая наносит 1d4 + МС силового урона. Можно распределить по разным целям.",
+                    "check_type": "Автопопадание",
+                    "check_effect": "Не требует броска атаки",
+                    "critical_effect": "Создаётся 5 стрел вместо 3",
+                    "failure_effect": "Заклинание провалено, ячейка потрачена",
+                    "blood_cost": "",
+                    "penalty": ""
+                },
+                {
+                    "id": "damage_8",
+                    "name": "Стрела Тьмы",
+                    "cost": "1",
+                    "casting_time": "1",
+                    "duration": "Мгновенно + 1 ход",
+                    "effect": "Сгусток тьмы наносит 3d6 + МС некротического урона. До конца следующего хода цель совершает с помехой броски атаки и проверки Силы.",
+                    "check_type": "Бросок атаки заклинанием",
+                    "check_effect": "Попадание: полный урон и эффект",
+                    "critical_effect": "Цель также получает уязвимость к свету до конца боя",
+                    "failure_effect": "Заклинание провалено, ячейка потрачена",
+                    "blood_cost": "",
+                    "penalty": ""
+                },
+                {
+                    "id": "damage_9",
+                    "name": "Луч Света",
+                    "cost": "2",
+                    "casting_time": "1",
+                    "duration": "Мгновенно",
+                    "effect": "Концентрированный луч света. Нежить и исчадия: 5d6 + МС урона излучением. Остальные: 3d6 + МС.",
+                    "check_type": "Спасбросок Телосложения",
+                    "check_effect": "При успехе: половина урона",
+                    "critical_effect": "Нежить получает дополнительно 2d8 урона излучением",
+                    "failure_effect": "Заклинание провалено, ячейка потрачена",
+                    "blood_cost": "",
+                    "penalty": ""
+                },
+                {
+                    "id": "damage_10",
+                    "name": "Землетрясение",
+                    "cost": "3",
+                    "casting_time": "1",
+                    "duration": "Мгновенно",
+                    "effect": "Локальные толчки наносят 3d8 + МС дробящего урона всем в зоне.",
+                    "check_type": "Спасбросок Ловкости",
+                    "check_effect": "Успех: половина урона, провал: полный урон + падение ничком",
+                    "critical_effect": "Цели, провалившие спасбросок, также получают состояние 'оглушён' на 1 ход",
+                    "failure_effect": "Заклинание провалено, ячейка потрачена",
+                    "blood_cost": "",
+                    "penalty": ""
+                },
+                {
+                    "id": "damage_11",
+                    "name": "Обморожение",
+                    "cost": "1",
+                    "casting_time": "1",
+                    "duration": "Мгновенно + 1 ход",
+                    "effect": "Цель получает 1d6 + МС урона холодом и скорость снижается на 6м до конца её следующего хода.",
+                    "check_type": "Бросок атаки заклинанием",
+                    "check_effect": "Попадание: полный урон и эффект",
+                    "critical_effect": "Цель теряет ход из-за оцепенения",
+                    "failure_effect": "Заклинание провалено, ячейка потрачена",
+                    "blood_cost": "",
+                    "penalty": ""
+                },
+                {
+                    "id": "damage_12",
+                    "name": "Проклятое пламя",
+                    "cost": "2",
+                    "casting_time": "1",
+                    "duration": "Мгновенно + до очистки",
+                    "effect": "Цель получает 1d8 + МС некротического урона. В начале каждого своего хода получает 1d6 урона огнём, пока не потратит на очистку.",
+                    "check_type": "Спасбросок Телосложения",
+                    "check_effect": "Успех: только начальный урон, провал: начальный + периодический урон",
+                    "critical_effect": "Периодический урон увеличивается до 2d6 (Воспламенение)",
+                    "failure_effect": "Заклинание провалено, ячейка потрачена",
+                    "blood_cost": "",
+                    "penalty": ""
+                },
+                {
+                    "id": "damage_13",
+                    "name": "Кислотный смерч",
+                    "cost": "3",
+                    "casting_time": "1",
+                    "duration": "1 минута (концентрация)",
+                    "effect": "Создаёт вихрь кислоты радиусом 3м. Начальный урон: 1d4 + МС. В начале вашего хода все в вихре получают 1d6 урона. Вы и союзники наносят двойной урон по целям в вихре.",
+                    "check_type": "Спасбросок Ловкости при создании",
+                    "check_effect": "Успех: половина начального урона",
+                    "critical_effect": "Вихрь длится 10 минут без концентрации",
+                    "failure_effect": "Вихрь появляется в случайной точке в пределах дистанции",
+                    "blood_cost": "",
+                    "penalty": ""
+                },
+                {
+                    "id": "status_1",
+                    "name": "Сон",
+                    "cost": "1",
+                    "casting_time": "1",
+                    "duration": "1 минута",
+                    "effect": "Погружает в сон существ с наименьшими ХП в зоне. Общий пул ХП: 5d8 + МС. Спящие недееспособны до получения урона.",
+                    "check_type": "Нет (система пула ХП)",
+                    "check_effect": "Не требует спасброска, действует на существ с наименьшими ХП",
+                    "critical_effect": "Пул ХП удваивается (10d8 + МС)",
+                    "failure_effect": "Заклинание провалено, ячейка потрачена",
+                    "blood_cost": "",
+                    "penalty": ""
+                },
+                {
+                    "id": "status_2",
+                    "name": "Паралич",
+                    "cost": "2",
+                    "casting_time": "1",
+                    "duration": "1 ход",
+                    "effect": "Пытается парализовать одно существо. Парализованная цель не может двигаться или действовать.",
+                    "check_type": "Спасбросок Телосложения",
+                    "check_effect": "Успех: нет эффекта, провал: паралич на 1 ход",
+                    "critical_effect": "Паралич длится 2 хода",
+                    "failure_effect": "Заклинание провалено, ячейка потрачена",
+                    "blood_cost": "",
+                    "penalty": ""
+                },
+                {
+                    "id": "status_3",
+                    "name": "Очарование",
+                    "cost": "2",
+                    "casting_time": "1",
+                    "duration": "1 час",
+                    "effect": "Делает гуманоида дружественным к вам. Не будет атаковать вас или ваших спутников. После окончания понимает, что был очарован.",
+                    "check_type": "Спасбросок Мудрости",
+                    "check_effect": "Успех: нет эффекта, провал: очарование на 1 час",
+                    "critical_effect": "Цель не понимает, что была очарована после окончания",
+                    "failure_effect": "Заклинание провалено, ячейка потрачена",
+                    "blood_cost": "",
+                    "penalty": ""
+                },
+                {
+                    "id": "status_4",
+                    "name": "Ослепление",
+                    "cost": "1",
+                    "casting_time": "1",
+                    "duration": "1 минута",
+                    "effect": "Лишает одно существо зрения. Броски атаки с помехой, атаки по нему - с преимуществом.",
+                    "check_type": "Спасбросок Телосложения",
+                    "check_effect": "Успех: нет эффекта, провал: ослепление на 1 минуту (повтор спасброска каждый ход)",
+                    "critical_effect": "Ослепление длится 10 минут",
+                    "failure_effect": "Заклинание провалено, ячейка потрачена",
+                    "blood_cost": "",
+                    "penalty": ""
+                },
+                {
+                    "id": "status_5",
+                    "name": "Безмолвие",
+                    "cost": "1",
+                    "casting_time": "1",
+                    "duration": "10 минут",
+                    "effect": "Создаёт сферу радиуса 4.5м полной тишины. Невозможно произносить вербальные компоненты заклинаний.",
+                    "check_type": "Нет (работает на область)",
+                    "check_effect": "Не требует спасброска от целей в зоне",
+                    "critical_effect": "Радиус увеличивается до 9м",
+                    "failure_effect": "Сфера появляется в случайном месте в пределах дистанции",
+                    "blood_cost": "",
+                    "penalty": ""
+                },
+                {
+                    "id": "status_6",
+                    "name": "Смятение",
+                    "cost": "2",
+                    "casting_time": "1",
+                    "duration": "1 минута",
+                    "effect": "Вселяет смятение в разум цели. В начале своего хода цель бросает d10 для определения действия (атакует ближайшее существо, ничего не делает и т.д.).",
+                    "check_type": "Спасбросок Интеллекта",
+                    "check_effect": "Успех: нет эффекта, провал: смятение на 1 минуту (повтор спасброска каждый ход)",
+                    "critical_effect": "Цель автоматически атакует ближайшее существо (включая союзников) каждый ход",
+                    "failure_effect": "Заклинание провалено, ячейка потрачена",
+                    "blood_cost": "",
+                    "penalty": ""
+                },
+                {
+                    "id": "status_7",
+                    "name": "Яд",
+                    "cost": "1",
+                    "casting_time": "1",
+                    "duration": "Мгновенно + до очистки",
+                    "effect": "Отравляет цель. Наносит 1d8 + МС урона ядом сразу и 1d6 урона ядом в начале каждого хода цели. Снимается м 'Очистка'.",
+                    "check_type": "Спасбросок Телосложения",
+                    "check_effect": "Успех: нет эффекта, провал: отравление с периодическим уроном",
+                    "critical_effect": "Периодический урон увеличивается до 2d6",
+                    "failure_effect": "Заклинание провалено, ячейка потрачена",
+                    "blood_cost": "",
+                    "penalty": ""
+                },
+                {
+                    "id": "status_8",
+                    "name": "Окаменение",
+                    "cost": "3",
+                    "casting_time": "1",
+                    "duration": "До снятия",
+                    "effect": "Пытается превратить цель в камень. Требует трёх проваленных спасбросков подряд в течение трёх ходов цели.",
+                    "check_type": "Спасбросок Телосложения (трижды)",
+                    "check_effect": "При одном успехе: заклинание оканчивается, при трёх провалах: полное окаменение",
+                    "critical_effect": "Требуется только один проваленный спасбросок",
+                    "failure_effect": "Заклинание провалено, ячейка потрачена",
+                    "blood_cost": "",
+                    "penalty": ""
+                },
+                {
+                    "id": "status_9",
+                    "name": "Страх",
+                    "cost": "1",
+                    "casting_time": "1",
+                    "duration": "1 минута",
+                    "effect": "Вселяет панику в существа в зоне. Испуганные существа должны перемещаться прочь от вас и не могут подходить ближе.",
+                    "check_type": "Спасбросок Мудрости",
+                    "check_effect": "Успех: нет эффекта, провал: испуг на 1 минуту (повтор спасброска каждый ход)",
+                    "critical_effect": "Цели не могут повторять спасбросок до конца боя",
+                    "failure_effect": "Заклинание провалено, ячейка потрачена",
+                    "blood_cost": "",
+                    "penalty": ""
+                },
+                {
+                    "id": "status_10",
+                    "name": "Проклятие",
+                    "cost": "2",
+                    "casting_time": "1",
+                    "duration": "1 час",
+                    "effect": "Накладывает проклятие на цель. Выберите один навык или характеристику - цель совершает проверки с помехой по нему.",
+                    "check_type": "Спасбросок Мудрости",
+                    "check_effect": "Успех: нет эффекта, провал: проклятие на 1 час",
+                    "critical_effect": "Проклятие затрагивает все навыки и характеристики",
+                    "failure_effect": "Заклинание провалено, ячейка потрачена",
+                    "blood_cost": "",
+                    "penalty": ""
+                },
+                {
+                    "id": "buff_1",
+                    "name": "Щит",
+                    "cost": "1",
+                    "casting_time": "Реакция",
+                    "duration": "До начала вашего следующего хода",
+                    "effect": "Когда по вам попадают атакой, создаёте магический барьер. Ваш КД увеличивается на +5 до начала вашего следующего хода.",
+                    "check_type": "Нет",
+                    "check_effect": "Не требует проверки",
+                    "critical_effect": "КД увеличивается на +10 вместо +5",
+                    "failure_effect": "Заклинание провалено, ячейка потрачена, реакция использована",
+                    "blood_cost": "",
+                    "penalty": ""
+                },
+                {
+                    "id": "buff_2",
+                    "name": "Ускорение",
+                    "cost": "3",
+                    "casting_time": "1",
+                    "duration": "1 минута (концентрация)",
+                    "effect": "Скорость цели удваивается, +2 к КД, одно дополнительное в ход (только Атака, Рывок, Отход, Использование предмета). После окончания - истощение на 1 ход.",
+                    "check_type": "Нет (на согласное существо)",
+                    "check_effect": "Не требует проверки",
+                    "critical_effect": "Не вызывает истощение после окончания",
+                    "failure_effect": "Заклинание провалено, ячейка потрачена",
+                    "blood_cost": "",
+                    "penalty": ""
+                },
+                {
+                    "id": "buff_3",
+                    "name": "Рассеивание магии",
+                    "cost": "2",
+                    "casting_time": "1",
+                    "duration": "Мгновенно",
+                    "effect": "Пытаетесь окончить одно заклинание. Автоматически рассеивает заклинания 3-го уровня и ниже. Для более высоких - проверка заклинания против Сл 10 + уровень заклинания.",
+                    "check_type": "Проверка заклинания (d20 + МС) для высокоуровневых эффектов",
+                    "check_effect": "Против Сл 10 + уровень рассеиваемого заклинания",
+                    "critical_effect": "Автоматически рассеивает независимо от уровня",
+                    "failure_effect": "Заклинание провалено, ячейка потрачена",
+                    "blood_cost": "",
+                    "penalty": ""
+                },
+                {
+                    "id": "buff_4",
+                    "name": "Телепортация",
+                    "cost": "3",
+                    "casting_time": "1",
+                    "duration": "Мгновенно",
+                    "effect": "Мгновенно перемещает вас и/или согласных существ в пределах досягаемости в знакомое место в пределах 100 км.",
+                    "check_type": "Нет (для согласных целей)",
+                    "check_effect": "Не требует проверки",
+                    "critical_effect": "Можно телепортироваться в любое видимое место в пределах 1 км без ограничения знакомства",
+                    "failure_effect": "Заклинание провалено, ячейка потрачена, возможна телепортация в случайное место",
+                    "blood_cost": "",
+                    "penalty": ""
+                },
+                {
+                    "id": "buff_5",
+                    "name": "Магическая броня",
+                    "cost": "1",
+                    "casting_time": "1",
+                    "duration": "8 часов",
+                    "effect": "КД цели становится равным 13 + модификатор Ловкости цели. Не действует, если цель уже носит доспех.",
+                    "check_type": "Нет (на согласное существо)",
+                    "check_effect": "Не требует проверки",
+                    "critical_effect": "КД становится 15 + модификатор Ловкости",
+                    "failure_effect": "Заклинание провалено, ячейка потрачена",
+                    "blood_cost": "",
+                    "penalty": ""
+                },
+                {
+                    "id": "buff_6",
+                    "name": "Оружие стихий",
+                    "cost": "2",
+                    "casting_time": "1",
+                    "duration": "1 час (концентрация)",
+                    "effect": "Немагическое оружие становится магическим и наносит дополнительно 1d4 урона выбранной стихией (огонь, холод, электричество, кислота).",
+                    "check_type": "Нет",
+                    "check_effect": "Не требует проверки",
+                    "critical_effect": "Дополнительный урон увеличивается до 1d8",
+                    "failure_effect": "Заклинание провалено, ячейка потрачена",
+                    "blood_cost": "",
+                    "penalty": ""
+                },
+                {
+                    "id": "buff_7",
+                    "name": "Невидимость",
+                    "cost": "2",
+                    "casting_time": "1",
+                    "duration": "1 час (концентрация)",
+                    "effect": "Цель становится невидимой. Эффект оканчивается, если цель атакует или накладывает заклинание.",
+                    "check_type": "Нет (на согласное существо)",
+                    "check_effect": "Не требует проверки",
+                    "critical_effect": "Эффект не оканчивается при атаке или накладывании заклинаний",
+                    "failure_effect": "Заклинание провалено, ячейка потрачена",
+                    "blood_cost": "",
+                    "penalty": ""
+                },
+                {
+                    "id": "buff_8",
+                    "name": "Отражение",
+                    "cost": "3",
+                    "casting_time": "Реакция",
+                    "duration": "Мгновенно",
+                    "effect": "Когда по вам направлено заклинание одиночной цели, создаёте зеркальный щит. Проверка заклинания против Сл атаки. При успехе заклинание отражается на кастера.",
+                    "check_type": "Проверка заклинания (d20 + МС)",
+                    "check_effect": "Против Сл атаки заклинанием",
+                    "critical_effect": "Автоматическое отражение без проверки",
+                    "failure_effect": "Заклинание провалено, ячейка потрачена, реакция использована",
+                    "blood_cost": "",
+                    "penalty": ""
+                },
+                {
+                    "id": "buff_9",
+                    "name": "Стихийный барьер",
+                    "cost": "2",
+                    "casting_time": "1",
+                    "duration": "1 час",
+                    "effect": "Создаёт барьер, поглощающий 3d6 + МС урона выбранной стихией (огонь, холод, электричество, кислота).",
+                    "check_type": "Нет",
+                    "check_effect": "Не требует проверки",
+                    "critical_effect": "Поглощает 6d6 + МС урона",
+                    "failure_effect": "Заклинание провалено, ячейка потрачена",
+                    "blood_cost": "",
+                    "penalty": ""
+                },
+                {
+                    "id": "buff_10",
+                    "name": "Восстановление",
+                    "cost": "2",
+                    "casting_time": "1",
+                    "duration": "Мгновенно",
+                    "effect": "Снимает одно ослабляющее состояние (отравлен, испуган и т.д.) или восстанавливает 2d8 + МС хитов.",
+                    "check_type": "Нет (на согласное существо)",
+                    "check_effect": "Не требует проверки",
+                    "critical_effect": "Снимает все ослабляющие состояния и восстанавливает 4d8 + МС хитов",
+                    "failure_effect": "Заклинание провалено, ячейка потрачена",
+                    "blood_cost": "",
+                    "penalty": ""
+                },
+                {
+                    "id": "blood_1",
+                    "name": "Кровавый клон",
+                    "cost": "2",
+                    "casting_time": "1",
+                    "duration": "1 минута",
+                    "effect": "Создаёт клона из своей крови с ХП = ваш уровень. Клон подчиняется простым командам бонусным м.",
+                    "check_type": "Нет",
+                    "check_effect": "Не требует проверки",
+                    "critical_effect": "Клон имеет вдвое больше ХП и может использовать одно ваше заклинание 1-го уровня",
+                    "failure_effect": "Заклинание провалено, ячейка и кровь потрачены, штраф -5 всё равно применяется",
+                    "blood_cost": "1",
+                    "penalty": "-5"
+                },
+                {
+                    "id": "blood_2",
+                    "name": "Кровавая хрень",
+                    "cost": "2",
+                    "casting_time": "1",
+                    "duration": "1 минута",
+                    "effect": "Используя кровь врага, если её тип совпадает с вашим, накладывает на цель штраф -4 ко всем проверкам характеристик.",
+                    "check_type": "Спасбросок Телосложения",
+                    "check_effect": "Успех: нет эффекта, провал: штраф -4 на 1 минуту",
+                    "critical_effect": "Штраф увеличивается до -8",
+                    "failure_effect": "Заклинание провалено, ячейка и кровь потрачены, штраф -5 всё равно применяется",
+                    "blood_cost": "1",
+                    "penalty": "-5"
+                },
+                {
+                    "id": "blood_3",
+                    "name": "Кровавое копьё",
+                    "cost": "1",
+                    "casting_time": "1",
+                    "duration": "Мгновенно",
+                    "effect": "Формирует копьё из крови и метает его. Наносит 3d6 + МС колющего урона. При использовании своей крови: +1d6 урона, но вы получаете 1d6 урона некрозом.",
+                    "check_type": "Бросок атаки заклинанием",
+                    "check_effect": "Попадание: полный урон",
+                    "critical_effect": "Урон удваивается (6d6 + МС)",
+                    "failure_effect": "Заклинание провалено, ячейка и кровь потрачены",
+                    "blood_cost": "1",
+                    "penalty": "0"
+                },
+                {
+                    "id": "blood_4",
+                    "name": "Трансмутация",
+                    "cost": "3",
+                    "casting_time": "10 минут (ритуал)",
+                    "duration": "Мгновенно",
+                    "effect": "Жертвуя своей жизненной силой (теряете половину текущих ХП), полностью восстанавливаете ячейки заклинаний себе или одному союзнику.",
+                    "check_type": "Нет",
+                    "check_effect": "Не требует проверки",
+                    "critical_effect": "Не требует потери ХП",
+                    "failure_effect": "Заклинание провалено, ячейка и кровь потрачены, ХП всё равно теряются, штраф -5 применяется",
+                    "blood_cost": "2",
+                    "penalty": "-5"
+                },
+                {
+                    "id": "blood_5",
+                    "name": "Мутация",
+                    "cost": "2",
+                    "casting_time": "1",
+                    "duration": "Мгновенно",
+                    "effect": "Вводит цели очищенную кровь. Восстанавливает хиты: (Кол-во БК у цели * модификатор Выносливости цели) + d20.",
+                    "check_type": "Нет (на согласное существо)",
+                    "check_effect": "Не требует проверки",
+                    "critical_effect": "Восстанавливает вдвое больше хитов",
+                    "failure_effect": "Заклинание провалено, ячейка и кровь потрачены",
+                    "blood_cost": "1",
+                    "penalty": "0"
+                },
+                {
+                    "id": "blood_6",
+                    "name": "Эскалация",
+                    "cost": "1",
+                    "casting_time": "1",
+                    "duration": "1 час",
+                    "effect": "Разбивая банку крови, испускаете феромонный сигнал. Привлекает ближайшее не-гуманоидное существо в радиусе 1 км. ХП призванного: ХП цели / d4.",
+                    "check_type": "Спасбросок Мудрости цели",
+                    "check_effect": "Успех: игнорирует сигнал, провал: вынуждено двигаться к месту разбития",
+                    "critical_effect": "Призывает существо с полными ХП (без деления на d4)",
+                    "failure_effect": "Призывает враждебное существо случайного типа",
+                    "blood_cost": "1",
+                    "penalty": "0"
+                },
+                {
+                    "id": "blood_7",
+                    "name": "Воскрешение",
+                    "cost": "3",
+                    "casting_time": "1 час (ритуал)",
+                    "duration": "Мгновенно",
+                    "effect": "Ритуал над телом, умершим не более недели назад. Бросок d20: 10+ - воскрешение с 1 ХП, 1 - привлекает внимание тёмных сущностей.",
+                    "check_type": "Ритуальный бросок d20",
+                    "check_effect": "10+: успех, 2-9: неудача, 1: критическая неудача",
+                    "critical_effect": "Воскрешение с полными ХП",
+                    "failure_effect": "Тело превращается в нежить, нападающую на кастера",
+                    "blood_cost": "3",
+                    "penalty": "-5"
+                },
+                {
+                    "id": "blood_8",
+                    "name": "Нацификация",
+                    "cost": "3",
+                    "casting_time": "1 час (ритуал)",
+                    "duration": "Постоянно",
+                    "effect": "Пытается изменить природу гуманоида, обратив его в рабское существо (зомби, вампир-слуга).",
+                    "check_type": "Ритуальная проверка заклинания (d20 + МС) против Сл цели (8 + МС цели + мод. Мудрости)",
+                    "check_effect": "Успех: превращение, провал: нет эффекта",
+                    "critical_effect": "Превращение полностью и навсегда",
+                    "failure_effect": "Цель становится враждебным могущественным монстром",
+                    "blood_cost": "2",
+                    "penalty": "-5"
+                },
+                {
+                    "id": "blood_9",
+                    "name": "Вызов Фамильяра",
+                    "cost": "2",
+                    "casting_time": "1 час (ритуал)",
+                    "duration": "Постоянно",
+                    "effect": "Призывает духа в форме животного. Фамильяр служит, может доставлять касательные заклинания. Если погибает, можно призвать снова.",
+                    "check_type": "Нет",
+                    "check_effect": "Не требует проверки",
+                    "critical_effect": "Фамильяр получает дополнительные способности (невидимость, полёт и т.д.)",
+                    "failure_effect": "Призывает враждебное существо",
+                    "blood_cost": "1",
+                    "penalty": "0"
+                },
+                {
+                    "id": "blood_10",
+                    "name": "Улучшенный собор крови",
+                    "cost": "2",
+                    "casting_time": "8 часов (ритуал)",
+                    "duration": "Постоянно",
+                    "effect": "Улучшает знания анатомии. При нанесении урона режущим/колющим оружием можно бонусным м извлечь 2d6 банок крови вместо 1.",
+                    "check_type": "Нет (пассивное улучшение)",
+                    "check_effect": "Не требует проверки",
+                    "critical_effect": "Можно извлекать 3d6 банок крови",
+                    "failure_effect": "Ритуал провален, ячейки потрачены",
+                    "blood_cost": "0",
+                    "penalty": "0"
+                },
+                {
+                    "id": "blood_11",
+                    "name": "Кровавая узы",
+                    "cost": "2",
+                    "casting_time": "1",
+                    "duration": "10 минут",
+                    "effect": "Связывает с согласным союзником. Цель получает бонус +1d4 к броскам атаки, проверкам и спасброскам Силы и Ловкости.",
+                    "check_type": "Нет (на согласное существо)",
+                    "check_effect": "Не требует проверки",
+                    "critical_effect": "Бонус увеличивается до +1d8",
+                    "failure_effect": "Заклинание провалено, ячейка и кровь потрачены, штраф -5 всё равно применяется",
+                    "blood_cost": "1",
+                    "penalty": "-5"
+                },
+                {
+                    "id": "blood_12",
+                    "name": "Кровавое проклятие",
+                    "cost": "3",
+                    "casting_time": "1",
+                    "duration": "До снятия",
+                    "effect": "Насылает проклятие на цель, используя её же кровь. Цель совершает с помехой все броски атаки и проверки характеристик. Снимается Рассеиванием магии 3+ или использованием БК цели.",
+                    "check_type": "Спасбросок Мудрости",
+                    "check_effect": "Успех: нет эффекта, провал: проклятие до снятия",
+                    "critical_effect": "Цель также теряет все пассивные способности",
+                    "failure_effect": "Заклинание провалено, ячейка и кровь потрачены, штраф -5 всё равно применяется",
+                    "blood_cost": "1",
+                    "penalty": "-5"
+                },
+                {
+                    "id": "blood_13",
+                    "name": "Кровожадность",
+                    "cost": "1",
+                    "casting_time": "1",
+                    "duration": "1 минута",
+                    "effect": "Наделяет оружие силой крови. Оружие наносит дополнительно 1d6 некротического урона, раны плохо заживают (цель не может восстанавливать ХП магией 1-го уровня).",
+                    "check_type": "Нет",
+                    "check_effect": "Не требует проверки",
+                    "critical_effect": "Дополнительный урон увеличивается до 2d6",
+                    "failure_effect": "Заклинание провалено, ячейка и кровь потрачены, урон себе всё равно наносится",
+                    "blood_cost": "1",
+                    "penalty": "0"
+                },
+                {
+                    "id": "blood_14",
+                    "name": "Кровавая вуаль",
+                    "cost": "2",
+                    "casting_time": "1",
+                    "duration": "1 минута",
+                    "effect": "Создаёт защитный барьер из крови. Поглощает до 10 + МС урона от магических атак. Первое существо, атаковавшее защищённого в ближнем бою, получает 1d6 некротического урона.",
+                    "check_type": "Нет",
+                    "check_effect": "Не требует проверки",
+                    "critical_effect": "Поглощает до 20 + МС урона",
+                    "failure_effect": "Заклинание провалено, ячейка и кровь потрачены",
+                    "blood_cost": "1",
+                    "penalty": "0"
+                },
+                {
+                    "id": "blood_15",
+                    "name": "Управление кровью",
+                    "cost": "3",
+                    "casting_time": "1",
+                    "duration": "1 ход",
+                    "effect": "Манипулирует кровью в теле противника. При провале спасброска выберите эффект: 1) Головокружение (помеха на все действия); 2) Паралич (пропуск следующего хода).",
+                    "check_type": "Спасбросок Телосложения",
+                    "check_effect": "Успех: нет эффекта, провал: выбранный эффект",
+                    "critical_effect": "Оба эффекта одновременно",
+                    "failure_effect": "Заклинание провалено, ячейка и кровь потрачены, штраф -5 всё равно применяется",
+                    "blood_cost": "2",
+                    "penalty": "-5"
+                },
+                {
+                    "id": "QOL-01",
+                    "name": "Походная тишина",
+                    "cost": "1 слот",
+                    "casting_time": "1 действие",
+                    "duration": "1 час",
+                    "effect": "Убирает мелкие звуки, даёт группе +5 к скрытности",
+                    "check_type": "Нет",
+                    "check_effect": "Нет",
+                    "critical_effect": "Нет",
+                    "failure_effect": "Нет",
+                    "blood_cost": "",
+                    "penalty": ""
+                },
+                {
+                    "id": "QOL-02",
+                    "name": "Мелодия лагеря",
+                    "cost": "1 слот",
+                    "casting_time": "1 действие",
+                    "duration": "8 часов",
+                    "effect": "+1 к восстановлению при коротком отдыхе для участников",
+                    "check_type": "Нет",
+                    "check_effect": "Нет",
+                    "critical_effect": "Нет",
+                    "failure_effect": "Нет",
+                    "blood_cost": "",
+                    "penalty": ""
+                },
+                {
+                    "id": "QOL-03",
+                    "name": "Самоматериализация",
+                    "cost": "1 слот",
+                    "casting_time": "1 бонусное действие",
+                    "duration": "10 минут",
+                    "effect": "Визуально оформляет/складывает снаряжение; переносимый вес воспринимается на 10% меньше",
+                    "check_type": "Сила",
+                    "check_effect": "Успех -- 15% легче",
+                    "critical_effect": "Крит -- 25% легче",
+                    "failure_effect": "Провал -- без эффекта",
+                    "blood_cost": "",
+                    "penalty": ""
+                },
+                {
+                    "id": "QOL-04",
+                    "name": "Готовый ужин",
+                    "cost": "1 слот",
+                    "casting_time": "10 минут",
+                    "duration": "Мгновенно",
+                    "effect": "Приготовление горячей еды для 1d6; еда даёт +2 к морали 1 час",
+                    "check_type": "Живучесть",
+                    "check_effect": "Успех -- +4 к морали",
+                    "critical_effect": "Крит -- даёт 1d4 временных хитов",
+                    "failure_effect": "Провал -- несъедобно (−1 к морали)",
+                    "blood_cost": "",
+                    "penalty": ""
+                },
+                {
+                    "id": "QOL-05",
+                    "name": "Починка без следа",
+                    "cost": "2 слота",
+                    "casting_time": "1 час",
+                    "duration": "Мгновенно",
+                    "effect": "Ремонт простых предметов: +1 к прочности до максимума",
+                    "check_type": "Интеллект",
+                    "check_effect": "Успех -- полная починка до max−1",
+                    "critical_effect": "Крит -- как новый",
+                    "failure_effect": "Провал -- −1 к прочности",
+                    "blood_cost": "",
+                    "penalty": ""
+                },
+                {
+                    "id": "QOL-06",
+                    "name": "Часовой компас",
+                    "cost": "1 слот",
+                    "casting_time": "1 действие",
+                    "duration": "24 часа",
+                    "effect": "Отмечает направление на ближайший отмеченный объект; +5 к навигации",
+                    "check_type": "Интеллект",
+                    "check_effect": "Успех -- надёжно",
+                    "critical_effect": "Крит -- также указывает расстояние",
+                    "failure_effect": "Провал -- не определяет",
+                    "blood_cost": "",
+                    "penalty": ""
+                },
+                {
+                    "id": "QOL-07",
+                    "name": "Пузыри чистоты",
+                    "cost": "1 слот",
+                    "casting_time": "1 действие",
+                    "duration": "1 час",
+                    "effect": "Убирает запах/пятна с одного предмета, предотвращает загрязнение",
+                    "check_type": "Ловкость",
+                    "check_effect": "Успех -- предмет чист и не пахнет",
+                    "critical_effect": "Крит -- дополнительно нейтрализует слабые яды",
+                    "failure_effect": "Провал -- нет эффекта",
+                    "blood_cost": "",
+                    "penalty": ""
+                },
+                {
+                    "id": "QOL-08",
+                    "name": "Мягкий сон",
+                    "cost": "2 слота",
+                    "casting_time": "1 действие",
+                    "duration": "8 часов",
+                    "effect": "Гарантирует спокойный отдых: полные эффекты отдыха без помех",
+                    "check_type": "Живучесть",
+                    "check_effect": "Успех -- стабилен",
+                    "critical_effect": "Крит -- снимает один негативный статус",
+                    "failure_effect": "Провал -- без эффекта",
+                    "blood_cost": "",
+                    "penalty": ""
+                },
+                {
+                    "id": "QOL-09",
+                    "name": "Сухой плащ",
+                    "cost": "1 слот",
+                    "casting_time": "1 действие",
+                    "duration": "24 часа",
+                    "effect": "Делает предмет водоотталкивающим; мгновенно сохнет",
+                    "check_type": "Ловкость",
+                    "check_effect": "Успех -- работает нормально",
+                    "critical_effect": "Крит -- защищает от проливного дождя (частично)",
+                    "failure_effect": "Провал -- нет эффекта",
+                    "blood_cost": "",
+                    "penalty": ""
+                },
+                {
+                    "id": "QOL-10",
+                    "name": "Запечатать след",
+                    "cost": "1 слот",
+                    "casting_time": "1 действие",
+                    "duration": "1 час",
+                    "effect": "Сглаживает свежие следы в радиусе 6 м",
+                    "check_type": "Ловкость",
+                    "check_effect": "Успех -- следы устранены",
+                    "critical_effect": "Крит -- создаёт ложные следы",
+                    "failure_effect": "Провал -- ничего не сделано",
+                    "blood_cost": "",
+                    "penalty": ""
+                },
+                {
+                    "id": "QOL-11",
+                    "name": "Лёгкое горение",
+                    "cost": "1 слот",
+                    "casting_time": "1 действие",
+                    "duration": "1 час",
+                    "effect": "Поддерживает маленький огонь без топлива (неэффективно в дождь)",
+                    "check_type": "Нет",
+                    "check_effect": "Нет",
+                    "critical_effect": "Нет",
+                    "failure_effect": "Нет",
+                    "blood_cost": "",
+                    "penalty": ""
+                },
+                {
+                    "id": "QOL-12",
+                    "name": "Чистая вода",
+                    "cost": "1 слот",
+                    "casting_time": "1 действие",
+                    "duration": "Мгновенно (до 10 л)",
+                    "effect": "Очищает воду, удаляет болезни/токсины",
+                    "check_type": "Живучесть",
+                    "check_effect": "Успех -- вода безопасна",
+                    "critical_effect": "Крит -- даёт 1d4 восстановл.",
+                    "failure_effect": "Провал -- остаётся загрязнённой",
+                    "blood_cost": "",
+                    "penalty": ""
+                },
+                {
+                    "id": "QOL-13",
+                    "name": "Организованный угол",
+                    "cost": "1 слот",
+                    "casting_time": "1 действие",
+                    "duration": "24 часа",
+                    "effect": "Магически организует хранилище: поиск занимает половину времени",
+                    "check_type": "Интеллект",
+                    "check_effect": "Успех -- надёжно",
+                    "critical_effect": "Крит -- дополнительно подсказки по расположению",
+                    "failure_effect": "Провал -- беспорядок остаётся",
+                    "blood_cost": "",
+                    "penalty": ""
+                },
+                {
+                    "id": "QOL-14",
+                    "name": "Заметка-память",
+                    "cost": "1 слот",
+                    "casting_time": "Мгновенно",
+                    "duration": "7 дней",
+                    "effect": "Руническая заметка до 300 слов, видимая только заклинателю",
+                    "check_type": "Интеллект",
+                    "check_effect": "Успех -- надёжна",
+                    "critical_effect": "Крит -- защищена от обнаружения",
+                    "failure_effect": "Провал -- тускнеет через день",
+                    "blood_cost": "",
+                    "penalty": ""
+                },
+                {
+                    "id": "QOL-15",
+                    "name": "Небольшая подсветка",
+                    "cost": "1 слот",
+                    "casting_time": "Бонусное действие",
+                    "duration": "1 час",
+                    "effect": "Мягкий свет вокруг предмета (2.5 м) для чтения/работы",
+                    "check_type": "Нет",
+                    "check_effect": "Нет",
+                    "critical_effect": "Нет",
+                    "failure_effect": "Нет",
+                    "blood_cost": "",
+                    "penalty": ""
+                },
+                {
+                    "id": "GRAV-01",
+                    "name": "Тяжесть касания",
+                    "cost": "1 слот",
+                    "casting_time": "1 действие",
+                    "duration": "1 минута",
+                    "effect": "Цель (один субъект) становится значительно тяжелее -- движения замедляются действует помеха на броски атаки; целевая проверка Сила против вашего DC снимает эффект",
+                    "check_type": "Сила",
+                    "check_effect": "Успех -- эффект уменьшается",
+                    "critical_effect": "Крит -- цель закреплена (движение уменьшено вдвое)",
+                    "failure_effect": "Провал -- эффект мгновенно рассеян",
+                    "blood_cost": "",
+                    "penalty": ""
+                },
+                {
+                    "id": "GRAV-02",
+                    "name": "Отталкивающий толчок",
+                    "cost": "1 слот",
+                    "casting_time": "1 действие",
+                    "duration": "Мгновенно",
+                    "effect": "Одной цели наносится импульс: отбрасывается на 4,5 м (при столкновении -- 1d6 урона)",
+                    "check_type": "Ловкость",
+                    "check_effect": "Успех -- цель частично смягчает отбрасывание (2,5 м)",
+                    "critical_effect": "Крит -- цель отбрасывается на 9 м и оглушена на 1 раунд",
+                    "failure_effect": "Провал -- не отбрасывается, может контратаковать",
+                    "blood_cost": "",
+                    "penalty": ""
+                },
+                {
+                    "id": "GRAV-03",
+                    "name": "Гравитационный прижим",
+                    "cost": "2 слота",
+                    "casting_time": "1 действие",
+                    "duration": "10 секунд",
+                    "effect": "Цель фиксируется к земле: не может прыгать, провал прыжка; проверка Сила для освобождения",
+                    "check_type": "Сила",
+                    "check_effect": "Успех -- освобождение с затратой действий",
+                    "critical_effect": "Крит -- освобождение и контратака",
+                    "failure_effect": "Провал -- цель остаётся прикованной",
+                    "blood_cost": "",
+                    "penalty": ""
+                },
+                {
+                    "id": "GRAV-04",
+                    "name": "Лёгкость шага",
+                    "cost": "1 слот",
+                    "casting_time": "Бонусное действие",
+                    "duration": "1 час",
+                    "effect": "Заклинатель или одно существо получает −15% «веса» (легкость), прыжки и выносливость улучшены",
+                    "check_type": "Ловкость",
+                    "check_effect": "Успех -- дополнительный бонус к передвижению +5%",
+                    "critical_effect": "Крит -- временное ускорение (+1 к инициативе)",
+                    "failure_effect": "Провал -- без эффекта",
+                    "blood_cost": "",
+                    "penalty": ""
+                },
+                {
+                    "id": "GRAV-05",
+                    "name": "Магнитная опора",
+                    "cost": "1 слот",
+                    "casting_time": "1 действие",
+                    "duration": "1 час",
+                    "effect": "Создаёт локальную гравитационную «ручку» на предмете (до 50 кг): предмет не теряется и легче удерживается",
+                    "check_type": "Сила",
+                    "check_effect": "Успех -- можно удержать до 75 кг",
+                    "critical_effect": "Крит -- предмет также не поддаётся чужим попыткам взять",
+                    "failure_effect": "Провал -- эффект не сработал",
+                    "blood_cost": "",
+                    "penalty": ""
+                },
+                {
+                    "id": "GRAV-06",
+                    "name": "Гравитационный бросок",
+                    "cost": "2 слота",
+                    "casting_time": "1 действие",
+                    "duration": "Мгновенно",
+                    "effect": "Радиус 6 м: все враги в радиусе получают притягивающий эффект к центру (перемещение к центру на 1-3 м) и теряют позицию",
+                    "check_type": "Ловкость",
+                    "check_effect": "Успех -- цель частично удерживается (сдвиг на 1 м)",
+                    "critical_effect": "Крит -- все цели сбиваются с ног и падают",
+                    "failure_effect": "Провал -- эффекта нет на стойких существ",
+                    "blood_cost": "",
+                    "penalty": ""
+                },
+                {
+                    "id": "GRAV-07",
+                    "name": "Антигравитационный всплеск",
+                    "cost": "3 слота",
+                    "casting_time": "1 действие",
+                    "duration": "6 секунд",
+                    "effect": "Массовое отталкивание в конусе 9 м: цели поднимаются в воздух на 1-3 м и теряют устойчивость; при падении -- 1d6 урона",
+                    "check_type": "Ловкость",
+                    "check_effect": "Успех -- цель снижает высоту подъёма",
+                    "critical_effect": "Крит -- цель выброшена дальше и получает дополнительно оглушение",
+                    "failure_effect": "Провал -- заклинание фокусируется и поражает заклинателя",
+                    "blood_cost": "",
+                    "penalty": ""
+                },
+                {
+                    "id": "GRAV-08",
+                    "name": "Местный тяжеловес",
+                    "cost": "2 слота",
+                    "casting_time": "1 действие",
+                    "duration": "1 минута",
+                    "effect": "Область радиус 6 м: все предметы и существа получают эффект +20% к весу; существам требуется проверка Сила для перемещения через зону",
+                    "check_type": "Сила",
+                    "check_effect": "Успех -- может пересечь зону с замедлением",
+                    "critical_effect": "Крит -- переносит зону как тяготеющее поле (вражеские атаки ослаблены)",
+                    "failure_effect": "Провал -- цель застревает и требует помощи",
+                    "blood_cost": "",
+                    "penalty": ""
+                },
+                {
+                    "id": "GRAV-09",
+                    "name": "Гравитационный замок",
+                    "cost": "2 слота",
+                    "casting_time": "1 действие",
+                    "duration": "10 минут",
+                    "effect": "Массовое удержание одной точки: все существа в радиусе 4,5 м не могут удалиться более чем на 1 м от точки; проверка Сила/Ловкость для выхода",
+                    "check_type": "Сила/Ловкость",
+                    "check_effect": "Успех -- выбирает альтернативный способ выйти",
+                    "critical_effect": "Крит -- выходит без затрат и оглушает других",
+                    "failure_effect": "Провал -- оставшиеся связаны (ограничение движений)",
+                    "blood_cost": "",
+                    "penalty": ""
+                },
+                {
+                    "id": "GRAV-10",
+                    "name": "Невидимый центр тяжести",
+                    "cost": "1 слот",
+                    "casting_time": "1 действие",
+                    "duration": "1 час",
+                    "effect": "Помечает цель: её центр тяжести смещён (слегка нестабилен) -- враги получают −1 к атакам против неё; сама цель получает +1 к уклонению при маневренности",
+                    "check_type": "Интеллект",
+                    "check_effect": "Успех -- эффект устойчив; цель лучше контролирует центр",
+                    "critical_effect": "Крит -- враг получает −2 к атакам вместо −1 для цели",
+                    "failure_effect": "Провал -- эффект делает цель более уязвимой (+1 к попаданию по ней)",
+                    "blood_cost": "",
+                    "penalty": ""
+                },
+                {
+                    "id": "GRAV-11",
+                    "name": "Za Hando",
+                    "cost": "1 слот",
+                    "casting_time": "1 действие",
+                    "duration": "",
+                    "effect": "Взмахом руки и произнеся заклинание, вы приближаете к себе существо или предмет. Цель теряет действие при своем ходе",
+                    "check_type": "Живучесть",
+                    "check_effect": "Цель получает помеху на действие",
+                    "critical_effect": "Крит -- враг получает 2d6 урона",
+                    "failure_effect": "Кастующий приближается к цели и теряет действие либо получает помеху при успешной проверке Живучести",
+                    "blood_cost": "",
+                    "penalty": ""
+                }
+            ]
+
+            // Augment the spell data
+            const augmentedSpells = augmentSpellData(sampleSpells);
+
+            // Initial render
+            renderSpells(augmentedSpells);
+
+            // Setup event listeners
+            setupEventListeners(augmentedSpells);
+        });
+    </script>
+</body>
+
+</html>
+
+

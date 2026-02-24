@@ -1,0 +1,2793 @@
+<!DOCTYPE html>
+<html lang="ru">
+
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Таблица Талантов D&D</title>
+  <style>
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+    }
+
+    body {
+      font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+      background: linear-gradient(135deg, #1a1a2e 0%, #16213e 100%);
+      color: #e0e0e0;
+      min-height: 100vh;
+      padding: 20px;
+    }
+
+    .container {
+      max-width: 1800px;
+      margin: 0 auto;
+      display: flex;
+      flex-direction: column;
+      gap: 20px;
+    }
+
+    header {
+      text-align: center;
+      padding: 20px;
+      background: rgba(0, 0, 0, 0.5);
+      border-radius: 15px;
+      border: 2px solid #3498db;
+      margin-bottom: 20px;
+      position: relative;
+    }
+
+    .home-btn {
+      position: absolute;
+      left: 20px;
+      top: 50%;
+      transform: translateY(-50%);
+      background: #2ecc71;
+      color: white;
+      border: none;
+      border-radius: 5px;
+      padding: 8px 15px;
+      cursor: pointer;
+      font-weight: bold;
+      transition: all 0.3s ease;
+      text-decoration: none;
+      display: flex;
+      align-items: center;
+      gap: 5px;
+    }
+
+    .home-btn:hover {
+      background: #27ae60;
+      transform: translateY(-50%) translateY(-2px);
+    }
+
+    .header-content {
+      display: inline-block;
+    }
+
+    h1 {
+      color: #f1c40f;
+      font-size: 2.5em;
+      margin-bottom: 10px;
+      text-shadow: 0 0 10px rgba(241, 196, 15, 0.5);
+    }
+
+    .subtitle {
+      color: #3498db;
+      font-size: 1.2em;
+    }
+
+    .main-layout {
+      display: flex;
+      gap: 20px;
+      flex-wrap: wrap;
+    }
+
+    .talents-section {
+      flex: 3;
+      min-width: 300px;
+      background: rgba(0, 0, 0, 0.7);
+      border-radius: 15px;
+      padding: 20px;
+      border: 1px solid #444;
+      display: flex;
+      flex-direction: column;
+      height: calc(150vh - 140px);
+      /* Или фиксированная высота */
+      min-height: 600px;
+      /* Минимальная высота */
+    }
+
+    .control-panel {
+      flex: 1;
+      min-width: 300px;
+      background: rgba(0, 0, 0, 0.7);
+      border-radius: 15px;
+      padding: 20px;
+      display: flex;
+      flex-direction: column;
+      gap: 20px;
+      border: 1px solid #444;
+    }
+
+    /* Фильтры и поиск */
+    .filters-container {
+      background: rgba(255, 255, 255, 0.05);
+      border-radius: 10px;
+      padding: 15px;
+      margin-bottom: 20px;
+      border: 1px solid #444;
+    }
+
+    .filter-group {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 10px;
+      margin-bottom: 15px;
+    }
+
+    .filter-btn {
+      padding: 8px 15px;
+      background: rgba(255, 255, 255, 0.1);
+      border: 1px solid #555;
+      border-radius: 20px;
+      color: #e0e0e0;
+      cursor: pointer;
+      transition: all 0.3s ease;
+    }
+
+    .filter-btn:hover {
+      background: rgba(255, 255, 255, 0.2);
+    }
+
+    .filter-btn.active {
+      background: #3498db;
+      border-color: #3498db;
+    }
+
+    .search-box {
+      position: relative;
+      margin-bottom: 15px;
+    }
+
+    #talentSearch {
+      width: 100%;
+      padding: 10px 40px 10px 15px;
+      background: rgba(255, 255, 255, 0.1);
+      border: 1px solid #555;
+      border-radius: 8px;
+      color: white;
+      font-size: 1em;
+    }
+
+    .search-icon {
+      position: absolute;
+      right: 15px;
+      top: 50%;
+      transform: translateY(-50%);
+      color: #95a5a6;
+    }
+
+    .talents-container {
+      overflow-y: auto;
+      flex-grow: 1;
+      max-height: 998px;
+      padding-bottom: 0;
+      /* Добавьте это */
+    }
+
+    .school-category:last-child {
+      margin-bottom: 0;
+      /* Уберите отступ у последнего элемента */
+    }
+
+    .school-category {
+      margin-bottom: 30px;
+      background: rgba(255, 255, 255, 0.05);
+      border-radius: 10px;
+      padding: 15px;
+      border-left: 5px solid;
+    }
+
+    .school-category:last-child {
+      margin-bottom: 0;
+    }
+
+    .school-header {
+      font-size: 1.4em;
+      font-weight: bold;
+      margin-bottom: 15px;
+      padding-bottom: 10px;
+      border-bottom: 2px solid;
+      display: flex;
+      align-items: center;
+      gap: 10px;
+    }
+
+    .school-icon {
+      width: 30px;
+      height: 30px;
+      border-radius: 50%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-weight: bold;
+      color: white;
+    }
+
+    .talents-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+      gap: 15px;
+    }
+
+    .talent-card {
+      background: rgba(255, 255, 255, 0.08);
+      border-radius: 8px;
+      padding: 15px;
+      cursor: pointer;
+      transition: all 0.3s ease;
+      border: 2px solid transparent;
+      position: relative;
+      min-height: 140px;
+    }
+
+    .talent-card.hidden {
+      display: none;
+    }
+
+    .talent-card:hover {
+      transform: translateY(-3px);
+      box-shadow: 0 5px 15px rgba(0, 0, 0, 0.3);
+    }
+
+    .talent-card.available {
+      border-color: #2ecc71;
+      box-shadow: 0 0 10px rgba(46, 204, 113, 0.3);
+    }
+
+    .talent-card.learned {
+      border-color: #f1c40f;
+      box-shadow: 0 0 15px rgba(241, 196, 15, 0.4);
+      background: rgba(241, 196, 15, 0.1);
+    }
+
+    .talent-card.unavailable {
+      opacity: 0.5;
+      cursor: not-allowed;
+    }
+
+    .talent-card.requirements-not-met {
+      border-color: #e74c3c;
+      border-style: dashed;
+    }
+
+    .talent-name {
+      font-weight: bold;
+      font-size: 1.1em;
+      margin-bottom: 8px;
+      color: #f1c40f;
+    }
+
+    .talent-school {
+      font-size: 0.9em;
+      color: #95a5a6;
+      margin-bottom: 10px;
+      display: inline-block;
+      padding: 2px 8px;
+      border-radius: 12px;
+      background: rgba(255, 255, 255, 0.1);
+    }
+
+    .talent-description {
+      font-size: 0.9em;
+      line-height: 1.4;
+      color: #bdc3c7;
+    }
+
+    .requirements-badge {
+      position: absolute;
+      top: 10px;
+      right: 10px;
+      background: rgba(231, 76, 60, 0.2);
+      color: #e74c3c;
+      padding: 2px 8px;
+      border-radius: 10px;
+      font-size: 0.8em;
+      border: 1px solid #e74c3c;
+    }
+
+    .requirements-badge.met {
+      background: rgba(46, 204, 113, 0.2);
+      color: #2ecc71;
+      border-color: #2ecc71;
+    }
+
+    .learned-badge {
+      position: absolute;
+      bottom: 10px;
+      right: 10px;
+      background: rgba(241, 196, 15, 0.2);
+      color: #f1c40f;
+      padding: 2px 8px;
+      border-radius: 10px;
+      font-size: 0.8em;
+      border: 1px solid #f1c40f;
+    }
+
+    .stats {
+      background: rgba(52, 152, 219, 0.2);
+      padding: 15px;
+      border-radius: 10px;
+      border-left: 4px solid #3498db;
+    }
+
+    .extra-points-control {
+      margin-top: 10px;
+      padding-top: 10px;
+      border-top: 1px solid rgba(255, 255, 255, 0.1);
+    }
+
+    .extra-points-control button {
+      margin-top: 5px;
+      padding: 5px 10px;
+      background: #2ecc71;
+      color: white;
+      border: none;
+      border-radius: 4px;
+      cursor: pointer;
+      font-size: 0.9em;
+    }
+
+    .extra-points-control button:hover {
+      background: #27ae60;
+    }
+
+    .talent-details {
+      background: rgba(46, 204, 113, 0.2);
+      padding: 15px;
+      border-radius: 10px;
+      border-left: 4px solid #2ecc71;
+      min-height: 300px;
+      flex-grow: 1;
+    }
+
+    .selected-talents {
+      background: rgba(241, 196, 15, 0.2);
+      padding: 15px;
+      border-radius: 10px;
+      border-left: 4px solid #f1c40f;
+      max-height: 300px;
+      overflow-y: auto;
+    }
+
+    .selected-talents ul {
+      list-style: none;
+      padding-left: 0;
+    }
+
+    .selected-talents li {
+      padding: 8px 12px;
+      margin: 5px 0;
+      background: rgba(255, 255, 255, 0.1);
+      border-radius: 5px;
+      border-left: 3px solid #f1c40f;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+    }
+
+    .selected-talents li .remove-talent {
+      background: #e74c3c;
+      color: white;
+      border: none;
+      border-radius: 4px;
+      padding: 2px 8px;
+      cursor: pointer;
+      font-size: 0.8em;
+    }
+
+    h2,
+    h3 {
+      color: #3498db;
+      margin-bottom: 10px;
+    }
+
+    h3 {
+      color: #2ecc71;
+    }
+
+    .talent-name-large {
+      color: #f1c40f;
+      font-size: 1.6em;
+      margin-bottom: 10px;
+    }
+
+    .requirements {
+      color: #e74c3c;
+      font-size: 0.9em;
+      margin-top: 15px;
+      padding: 10px;
+      background: rgba(231, 76, 60, 0.1);
+      border-radius: 5px;
+      border-left: 3px solid #e74c3c;
+    }
+
+    .requirements.met {
+      color: #2ecc71;
+      background: rgba(46, 204, 113, 0.1);
+      border-left: 3px solid #2ecc71;
+    }
+
+    .controls {
+      display: flex;
+      gap: 10px;
+      justify-content: space-between;
+      margin-top: 20px;
+    }
+
+    button {
+      padding: 12px 20px;
+      border: none;
+      border-radius: 5px;
+      cursor: pointer;
+      font-weight: bold;
+      transition: all 0.3s ease;
+      flex: 1;
+    }
+
+    #learnBtn {
+      background: #2ecc71;
+      color: white;
+    }
+
+    #learnBtn:disabled {
+      background: #555;
+      cursor: not-allowed;
+    }
+
+    #learnBtn:hover:not(:disabled) {
+      background: #27ae60;
+      transform: translateY(-2px);
+    }
+
+    #resetBtn {
+      background: #e74c3c;
+      color: white;
+    }
+
+    #resetBtn:hover {
+      background: #c0392b;
+      transform: translateY(-2px);
+    }
+
+    #exportBtn {
+      background: #3498db;
+      color: white;
+    }
+
+    #exportBtn:hover {
+      background: #2980b9;
+      transform: translateY(-2px);
+    }
+
+    #bonusesBtn {
+      background: #9b59b6;
+      color: white;
+      margin-top: 10px;
+    }
+
+    #bonusesBtn:hover {
+      background: #8e44ad;
+      transform: translateY(-2px);
+    }
+
+    .level-indicator {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      margin-top: 10px;
+      flex-wrap: wrap;
+    }
+
+    .level-dot {
+      width: 20px;
+      height: 20px;
+      border-radius: 50%;
+      background: #555;
+      cursor: pointer;
+      position: relative;
+    }
+
+    .level-dot.active {
+      background: #f1c40f;
+      box-shadow: 0 0 10px #f1c40f;
+    }
+
+    .level-dot.talent-point {
+      background: #2ecc71;
+      box-shadow: 0 0 10px #2ecc71;
+    }
+
+    .level-dot:hover::after {
+      content: attr(title);
+      position: absolute;
+      top: -30px;
+      left: 50%;
+      transform: translateX(-50%);
+      background: rgba(0, 0, 0, 0.8);
+      color: white;
+      padding: 5px;
+      border-radius: 4px;
+      font-size: 12px;
+      white-space: nowrap;
+      z-index: 100;
+    }
+
+    footer {
+      text-align: center;
+      padding: 20px;
+      color: #7f8c8d;
+      font-size: 0.9em;
+      border-top: 1px solid #444;
+      margin-top: 20px;
+    }
+
+    .points-display {
+      font-size: 1.2em;
+      color: #2ecc71;
+      font-weight: bold;
+    }
+
+    .school-requirements {
+      font-size: 0.9em;
+      margin-top: 5px;
+      color: #95a5a6;
+      font-style: italic;
+    }
+
+    .no-results {
+      text-align: center;
+      padding: 30px;
+      color: #95a5a6;
+      font-style: italic;
+    }
+
+    /* Модальное окно */
+    .modal-overlay {
+      position: fixed;
+      top: 0;
+      left: 0;
+      right: 0;
+      bottom: 0;
+      background: rgba(0, 0, 0, 0.8);
+      display: none;
+      justify-content: center;
+      align-items: center;
+      z-index: 1000;
+    }
+
+    .modal-content {
+      background: linear-gradient(135deg, #1a1a2e 0%, #16213e 100%);
+      border-radius: 15px;
+      padding: 30px;
+      max-width: 800px;
+      max-height: 80vh;
+      overflow-y: auto;
+      border: 2px solid #3498db;
+      position: relative;
+      width: 90%;
+    }
+
+    .modal-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 20px;
+      border-bottom: 2px solid #3498db;
+      padding-bottom: 10px;
+    }
+
+    .modal-title {
+      color: #f1c40f;
+      font-size: 1.8em;
+    }
+
+    .close-modal {
+      background: #e74c3c;
+      color: white;
+      border: none;
+      border-radius: 50%;
+      width: 30px;
+      height: 30px;
+      font-size: 1.2em;
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+
+    .close-modal:hover {
+      background: #c0392b;
+    }
+
+    .bonus-section {
+      margin-bottom: 25px;
+      padding: 15px;
+      background: rgba(255, 255, 255, 0.05);
+      border-radius: 8px;
+      border-left: 4px solid;
+    }
+
+    .bonus-section h3 {
+      color: #f1c40f;
+      margin-bottom: 10px;
+      display: flex;
+      align-items: center;
+      gap: 10px;
+    }
+
+    .bonus-list {
+      list-style: none;
+      padding-left: 0;
+    }
+
+    .bonus-list li {
+      padding: 8px 0;
+      border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+      display: flex;
+      justify-content: space-between;
+    }
+
+    .bonus-list li:last-child {
+      border-bottom: none;
+    }
+
+    .bonus-value {
+      color: #2ecc71;
+      font-weight: bold;
+      margin-left: 10px;
+    }
+
+    .bonus-talent-name {
+      color: #95a5a6;
+      font-size: 0.9em;
+      font-style: italic;
+    }
+
+    @media (max-width: 768px) {
+      .main-layout {
+        flex-direction: column;
+      }
+
+      .talents-section,
+      .control-panel {
+        min-width: 100%;
+      }
+
+      .talents-grid {
+        grid-template-columns: 1fr;
+      }
+
+      .filter-group {
+        flex-direction: column;
+      }
+
+      .modal-content {
+        width: 95%;
+        padding: 20px;
+      }
+    }
+  </style>
+</head>
+
+<body>
+  <!-- Модальное окно для бонусов -->
+  <div class="modal-overlay" id="bonusesModal">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h2 class="modal-title">🎯 Активные бонусы персонажа</h2>
+        <button class="close-modal" id="closeModal">×</button>
+      </div>
+
+      <div id="bonusesContent">
+        <!-- Бонусы будут заполнены JavaScript -->
+      </div>
+    </div>
+  </div>
+
+  <div class="container">
+    <header>
+      <a href="https://docs.google.com/spreadsheets/d/1mDbBa7rYnx8Qve_hQHEO9RhcPoo3-oNd9SJgguY8CQ4/edit?gid=0#gid=0" class="home-btn">🏠 НПС</a>
+      <div class="header-content">
+        <h1>⚔️ Таблица Талантов D&D</h1>
+        <p class="subtitle">По мотивам Heroes of Might and Magic V | Кастомная система развития</p>
+      </div>
+    </header>
+
+    <div class="main-layout">
+      <div class="talents-section">
+        <!-- Фильтры и поиск -->
+        <div class="filters-container">
+          <div class="search-box">
+            <input type="text" id="talentSearch" placeholder="🔍 Поиск талантов по названию или описанию..." />
+            <div class="search-icon">🔍</div>
+          </div>
+
+          <div class="filter-group">
+            <button class="filter-btn active" data-filter="all">
+              Все таланты
+            </button>
+            <button class="filter-btn" data-filter="available">
+              Доступные
+            </button>
+            <button class="filter-btn" data-filter="learned">
+              Выученные
+            </button>
+            <button class="filter-btn" data-filter="requirements-not-met">
+              Требования
+            </button>
+          </div>
+
+          <div class="filter-group">
+            <button class="filter-btn active" data-school="all">
+              Все школы
+            </button>
+            <button class="filter-btn" data-school="basic">Основные</button>
+            <button class="filter-btn" data-school="advanced">
+              Продвинутые
+            </button>
+            <button class="filter-btn" data-school="special">
+              Специальные
+            </button>
+            <button class="filter-btn" data-school="legendary">
+              Легендарные
+            </button>
+          </div>
+        </div>
+
+        <!-- Контейнер для талантов -->
+        <div class="talents-container">
+          <div id="basicSchools" class="school-category" style="border-left-color: #e74c3c; display: none">
+            <div class="school-header" style="color: #e74c3c">
+              <div class="school-icon" style="background: #e74c3c">А</div>
+              Основные школы
+            </div>
+            <div class="talents-grid">
+              <!-- Заполнится JavaScript -->
+            </div>
+          </div>
+
+          <div id="advancedSchools" class="school-category" style="border-left-color: #f1c40f; display: none">
+            <div class="school-header" style="color: #f1c40f">
+              <div class="school-icon" style="background: #f1c40f">П</div>
+              Продвинутые школы
+              <span class="school-requirements">(требуют таланты в основных школах)</span>
+            </div>
+            <div class="talents-grid">
+              <!-- Заполнится JavaScript -->
+            </div>
+          </div>
+
+          <div id="specialSchools" class="school-category" style="border-left-color: #9b59b6; display: none">
+            <div class="school-header" style="color: #9b59b6">
+              <div class="school-icon" style="background: #9b59b6">С</div>
+              Специальные школы
+              <span class="school-requirements">(требуют комбинацию талантов)</span>
+            </div>
+            <div class="talents-grid">
+              <!-- Заполнится JavaScript -->
+            </div>
+          </div>
+
+          <div id="legendaryTalents" class="school-category" style="border-left-color: #d35400; display: none">
+            <div class="school-header" style="color: #d35400">
+              <div class="school-icon" style="background: #d35400">Л</div>
+              Легендарные таланты
+              <span class="school-requirements">(требуют 15+ уровень)</span>
+            </div>
+            <div class="talents-grid">
+              <!-- Заполнится JavaScript -->
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <div class="control-panel">
+        <div class="stats">
+          <h2>📊 Статистика персонажа</h2>
+          <div class="level-indicator">
+            <strong>Уровень:</strong>
+            <span id="levelDisplay">2</span>
+            <div class="level-dots">
+              <!-- Будет заполнено JavaScript -->
+            </div>
+          </div>
+          <div class="talent-points">
+            <strong>Очки талантов:</strong>
+            <span id="talentPoints" class="points-display">1</span>/<span id="totalTalentPoints">10</span>
+            <span id="extraPointsDisplay" style="color: #f1c40f; margin-left: 5px"></span>
+          </div>
+          <div class="talents-learned">
+            <strong>Выучено талантов:</strong>
+            <span id="talentsLearned" class="points-display">0</span>
+          </div>
+
+          <!-- Кнопка для показа бонусов -->
+          <button id="bonusesBtn">📊 Показать все бонусы</button>
+
+          <!-- Управление дополнительными очками -->
+          <div class="extra-points-control">
+            <strong>Дополнительные очки:</strong>
+            <div>
+              <button id="addQuestPoint">+ Очко за квест</button>
+              <button id="addStoryPoint">+ Очко за историю</button>
+              <button id="addAchievementPoint">+ Очко за достижение</button>
+            </div>
+          </div>
+        </div>
+
+        <div class="talent-details">
+          <h2>🔍 Детали таланта</h2>
+          <div id="talentDetails">
+            <p>Нажмите на талант в таблице, чтобы увидеть его описание</p>
+          </div>
+        </div>
+
+        <div class="selected-talents">
+          <h3>🎯 Выбранные таланты</h3>
+          <ul id="selectedTalentsList">
+            <!-- Будет заполнено JavaScript -->
+          </ul>
+        </div>
+
+        <div class="controls">
+          <button id="learnBtn" disabled>Выучить талант</button>
+          <button id="resetBtn">Сбросить всё</button>
+          <button id="exportBtn">Экспорт билда</button>
+        </div>
+      </div>
+    </div>
+
+    <footer>
+      <p>
+        Адаптировано для D&D.
+      </p>
+      <p>
+        Используйте очки талантов на уровнях: 2, 4, 6, 8, 10, 12, 14, 16, 18,
+        20 (всего 10 очков) + дополнительные очки
+      </p>
+    </footer>
+  </div>
+
+  <script>
+    // Структурированные данные талантов
+    const talentData = {
+      "basicSchools": [
+        {
+          "id": "attack",
+          "name": "Атака",
+          "color": "#e74c3c",
+          "icon": "⚔️",
+          "talents": [
+            {
+              "id": "attack_1",
+              "name": "Профессиональное владение",
+              "description": "Владение одним видом экзотического оружия. Критические попадания происходят при 19."
+            },
+            {
+              "id": "attack_2",
+              "name": "Мастер безоружного боя",
+              "description": "Безоружные атаки считаются атаками оружием с уроном 2d8."
+            },
+            {
+              "id": "attack_3",
+              "name": "Точный Удар",
+              "description": "Один раз за ход, при попадании атакой с преимуществом, добавить к урону +1d6. На 10 уровне становится +1d10."
+            },
+            {
+              "id": "attack_4",
+              "name": "Военная Машина",
+              "description": "Метательные оружия, конструкции и оружие ближнего боя получают постоянную прибавку к попаданию 1d6, класс брони увеличивается на +2 при ношении доспехов (полный комплект).",
+              "requirements": ["attack_1", "defense_1"]
+            },
+            {
+              "id": "attack_5",
+              "name": "Безудержный Натиск",
+              "description": "Если в свой ход вы преодолели какое-то расстояние перед атакой, вы получаете +2 к броску атаки, безоружная атака при провале целью проверки теряет равновесие.",
+              "requirements": ["attack_1", "awareness_1"]
+            }
+          ]
+        },
+        {
+          "id": "defense",
+          "name": "Защита",
+          "color": "#3498db",
+          "icon": "🛡️",
+          "talents": [
+            {
+              "id": "defense_1",
+              "name": "Живучесть",
+              "description": "Максимум хитов увеличивается на 10 за каждый уровень."
+            },
+            {
+              "id": "defense_2",
+              "name": "Внутренняя Гармония",
+              "description": "Выберите один тип магического или элементарного урона. Вы получаете сопротивление к этому урону. Урон режется от этого типа на половину. Раз в длительный отдых можно поменять"
+            },
+            {
+              "id": "defense_3",
+              "name": "Стойкость",
+              "description": "Вы получаете сопротивление к урону одного физического типа (дробящий, колющий, рубящий) на ваш выбор. Раз в длительный отдых можно поменять."
+            },
+            {
+              "id": "defense_4",
+              "name": "Несокрушимый",
+              "description": "Когда вы получаете урон к которому имеете сопротивление, ваша кожа твердеет, вы получаете сопротивление ко всему урону до начала вашего следующего хода.",
+              "requirements": ["defense_3", "defense_2", "awareness_4"]
+            },
+            {
+              "id": "defense_5",
+              "name": "Уклонение от стрел",
+              "description": "Требует талант в Скрытности. Вы получаете +2 КД против атак дальнобойным оружием. Если вы в укрытии, атакующие получают помеху к броскам атаки по вам дальнобойным оружием.",
+              "requirements": ["defense_1", "awareness_1"]
+            },
+            {
+              "id": "defense_6",
+              "name": "Битва до последнего",
+              "description": "Когда вы получаете удар, который должен был вас убить, вы вместо этого остаетесь с 1 хит поинтом. Эффект срабатывает 1 раз за длительный отдых.",
+              "requirements": ["defense_4", "attack_1"]
+            }
+          ]
+        },
+        {
+          "id": "magic",
+          "name": "Колдовство",
+          "color": "#9b59b6",
+          "icon": "🔮",
+          "talents": [
+            {
+              "id": "magic_1",
+              "name": "Магическая Проницательность",
+              "description": "Ваши спасброски получают +3, вражеские -3."
+            },
+            {
+              "id": "magic_2",
+              "name": "Интуитивное Колдовство",
+              "description": "Один раз в день, если у вас не осталось ячеек заклинаний, вы можете наложить одно известное вам заклинание без использования ячейки."
+            },
+            {
+              "id": "magic_3",
+              "name": "Концентрация Мага",
+              "description": "Когда вы концентрируетесь на заклинании, вы получаете +3 на попадание, +2 на концентрацию, а эффекты накладываются эффективнее (-3).",
+              "requirements": ["magic_1", "attack_3"]
+            },
+            {
+              "id": "magic_4",
+              "name": "Рефлекторное Колдовство",
+              "description": "Вы можете своей реакцией, потратив ячейку заклинания, попытаться отразить заклинание, нацеленное на вас.",
+              "requirements": ["awareness_1", "defense_1"]
+            },
+            {
+              "id": "magic_5",
+              "name": "Рунный Запас",
+              "description": "Раз в короткий отдых вы можете создать магическую руну, которая может содержать одно заклинание ценой в 1 ячейку, известное вам. Руна активируется при контакте."
+            },
+            {
+              "id": "magic_6",
+              "name": "Искусство Зельеварения",
+              "description": "Вы можете создавать одно простое зелье (лечебное, яд или магическое) в течение короткого отдыха, используя доступные компоненты на сумму не более 10 зм."
+            },
+            {
+              "id": "magic_7",
+              "name": "Ярмарочный фокусник",
+              "description": "QOL заклинания, как например искры из рук, телекинез небольших предметов, малые иллюзии и фокусы не требует ячеек заклинания, и кастуется без каких-либо проверок.",
+              "requirements": ["magic_1", "magic_6", "magic_5"]
+            },
+            {
+              "id": "magic_8",
+              "name": "Проникающее Заклинание",
+              "description": "Когда вы накладываете заклинание, наносящее урон, вы можете потратить дополнительную ячейку заклинания, чтобы игнорировать сопротивление цели к этому типу урона. Если у цели была уязвимость, вы вместо этого наносите обычный урон, но добавляете к урону ещё один бросок кубиков заклинания."
+            }
+          ]
+        },
+        {
+          "id": "awareness",
+          "name": "Готовность",
+          "color": "#2ecc71",
+          "icon": "👁️",
+          "talents": [
+            {
+              "id": "awareness_1",
+              "name": "Тактическое Превосходство",
+              "description": "Вы и все союзники получают +1 к бонусу инициативы."
+            },
+            {
+              "id": "awareness_2",
+              "name": "Бдительность",
+              "description": "Вы не можете быть захвачены врасплох, пока вы в сознании. Кроме того, вы получаете бонус +5 к инициативе."
+            },
+            {
+              "id": "awareness_3",
+              "name": "Анализ Противника",
+              "description": "Бонусным действием вы можете изучить одно существо в пределах видимости. Узнайте: его КД, статус хитов или одну уязвимость/сопротивление. Можно использовать число раз равное количеству перков Готовности."
+            },
+            {
+              "id": "awareness_4",
+              "name": "Неугасимый Дух",
+              "description": "Когда вы восстанавливаете хиты союзнику с помощью заклинания или умения, он получает дополнительные хиты, равные количеству талантов Готовность х2 (на 10 уровне х10)",
+              "requirements": ["defense_2", "magic_1"]
+            },
+            {
+              "id": "awareness_5",
+              "name": "Знание Местности",
+              "description": "Перед началом любого боя вы можете использовать бесплатное действие один раз в день",
+              "requirements": ["awareness_1", "awareness_2", "magic_1"]
+            },
+            {
+              "id": "awareness_6",
+              "name": "Тактический Анализ",
+              "description": "В начале боя, до броска инициативы, вы можете один раз использовать бесплатное действие, чтобы прошептать одному союзнику план. В первом раунде этот союзник может один раз перебросить результат броска атаки или урона, если результат его не устроил.",
+              "requirements": ["awareness_1", "awareness_3"]
+            }
+          ]
+        },
+        {
+          "id": "stealth",
+          "name": "Скрытность",
+          "color": "#7f8c8d",
+          "icon": "👤",
+          "talents": [
+            {
+              "id": "stealth_1",
+              "name": "Призрачный Шаг",
+              "description": "При действии Рывок можно Бонусным действием попытаться спрятаться, даже если вас только что видели, при наличии укрытия."
+            },
+            {
+              "id": "stealth_2",
+              "name": "Удар из Тени",
+              "description": "+1d10 урона оружием, когда попадаете по существу, которое вас не видит, или если у вас есть преимущество на бросок атаки. На 11 уровне становится +2d10."
+            },
+            {
+              "id": "stealth_3",
+              "name": "Мастер Маскировки",
+              "description": "Бонус +8 к проверкам Скрытность и Переодевание. 1/короткий отдых: создать легкое укрытие для попытки скрыться.",
+              "requirements": ["awareness_1", "stealth_1"]
+            },
+            {
+              "id": "stealth_4",
+              "name": "Тихая Смерть",
+              "description": "Атаки по удивленным существам - авто-криты.",
+              "requirements": ["awareness_1", "stealth_2"]
+            },
+            {
+              "id": "stealth_5",
+              "name": "Свой среди чужих",
+              "description": "Если вы замаскировались под члена какой-либо фракции или стражи. Цель должна сделать спасбросок Интеллекта против вашего броска. В случае провала, она не заподозрит неладное до конца сцены, если вы не сделаете что-то откровенно враждебное.",
+              "requirements": ["stealth_3", "awareness_2"]
+            }
+          ]
+        },
+        {
+          "id": "mind",
+          "name": "Мысли",
+          "color": "#FF6B8B",
+          "icon": "🧠",
+          "talents": [
+            {
+              "id": "mind_1",
+              "name": "Острое Слово",
+              "description": "Действием вы можете произнести остроумную фразу. Союзник получает +1d4 к следующей проверке характеристики до конца вашего следующего хода. Враг теряет 1d4 к попаданиям и спасброскам"
+            },
+            {
+              "id": "mind_2",
+              "name": "Саркастическое Замечание",
+              "description": "Когда враг проваливает атаку по вам, вы можете реакцией унизить его. Враг получает помеху к следующему броску атаки до конца своего следующего хода."
+            },
+            {
+              "id": "mind_3",
+              "name": "Мотивирующая Речь",
+              "description": "Один раз в день вы можете произнести вдохновляющую речь продолжительностью 1 минуту. Все союзники, которые слышат вас, получают преимущество на спасброски и +4 на попадание при критическом успехе +1d8 к урону."
+            },
+            {
+              "id": "mind_4",
+              "name": "Психологический Нажим",
+              "description": "Вы можете использовать действие, чтобы психологически давить на врага. Враг должен совершить спасбросок. При провале он получает помеху к броскам атаки против вас на ход.",
+              "requirements": ["magic_1", "mind_1"]
+            },
+            {
+              "id": "mind_5",
+              "name": "Игровая Тактика",
+              "description": "Когда вы даете подсказку союзнику, он может перебросить один из кубиков урона в своей следующей успешной атаке либо выполнить действие и взять лучший результат.",
+              "requirements": ["defense_1", "magic_1", "mind_1"]
+            },
+            {
+              "id": "mind_6",
+              "name": "Окрик",
+              "description": "Когда союзник в пределах 60 футов от вас получает ранение, которое должно вырубить его, вы можете своей реакцией крикнуть ему, чтоб не помирал. Союзник вместо этого остаётся с 1 хитом, но теряет свою реакцию и бонусное действие в следующем ходу. Эффект срабатывает 1 раз за короткий отдых.",
+              "requirements": ["mind_3"]
+            }
+          ]
+        },
+        {
+          "id": "survival",
+          "name": "Выживание",
+          "color": "#CD853F",
+          "icon": "🪓",
+          "talents": [
+            {
+              "id": "survival_1",
+              "name": "Следопыт",
+              "description": "Вы получаете бонус +5 к броскам на Выживание (поиск следов, ориентирование на местности). Ваша группа не может заблудиться в знакомой вам местности."
+            },
+            {
+              "id": "survival_2",
+              "name": "Эффективная Разделка",
+              "description": "При сборе ресурсов с поверженных врагов бросок действия совершается с преимуществом. Если вы уже умеете собирать больше, бонус увеличивается."
+            },
+            {
+              "id": "survival_3",
+              "name": "Походный Умелец",
+              "description": "Во время короткого отдыха вы можете потратить один из своих слотов мастерства на мелкий ремонт снаряжения, восстанавливая 1к6 прочности предмету (без использования инструментов). Один раз в день можете починить сломанный не-магический предмет до состояния \"рабочий, но хлипкий\"."
+            },
+            {
+              "id": "survival_4",
+              "name": "Природная Броня",
+              "description": "Пока вы не носите тяжёлый доспех, ваша ловкость и закалка дают вам +2 к КД. Если вы в лёгком или среднем доспехе, этот бонус уменьшается до +1.",
+              "requirements": ["survival_1", "defense_1"]
+            },
+            {
+              "id": "survival_5",
+              "name": "Мастер на Все Руки",
+              "description": "Во время долгого отдыха вы можете выполнить на одно действие больше (то есть 3 действия вместо 2), но это действие должно быть связано с крафтом, починкой или сбором ресурсов.",
+              "requirements": ["survival_2", "survival_3"]
+            }
+          ]
+        }
+      ],
+      "advancedSchools": [
+        {
+          "id": "luck",
+          "name": "Удача",
+          "color": "#f1c40f",
+          "icon": "🍀",
+          "requirements": ["attack_1", "awareness_1"],
+          "talents": [
+            {
+              "id": "luck_1",
+              "name": "Везучий",
+              "description": "Один раз в день, когда вы проваливаете бросок атаки, проверку характеристики или спасбросок, вы можете перебросить кубик и должны использовать новый результат.",
+              "requirements": ["attack_1", "awareness_1"]
+            },
+            {
+              "id": "luck_2",
+              "name": "Уклонение от Судьбы",
+              "description": "Когда эффект заставляет вас сделать спасбросок от урона в половину, при успехе вы вместо этого не получаете урона.",
+              "requirements": ["attack_1", "awareness_1"]
+            },
+            {
+              "id": "luck_3",
+              "name": "Спонтанная Тактика",
+              "description": "Когда союзник в пределах 30 футов от вас совершает критическое попадание или проваливает спасбросок, вы можете своей реакцией дать ему бонус +1d4 к следующему броску.",
+              "requirements": ["attack_1", "awareness_1"]
+            }
+          ]
+        },
+        {
+          "id": "destruction",
+          "name": "Разрушение",
+          "color": "#e67e22",
+          "icon": "🔥",
+          "requirements": ["attack_1", "magic_1"],
+          "talents": [
+            {
+              "id": "destruction_1",
+              "name": "Магическая Стрела",
+              "description": "Ваши заклинания, наносящие урон, игнорируют сопротивление магическому урону у целей.",
+              "requirements": ["attack_1", "magic_1"]
+            },
+            {
+              "id": "destruction_2",
+              "name": "Огненная Ярость",
+              "description": "Когда вы накладываете заклинание, наносящее урон огнем, добавьте к урону свой модификатор силы и магии.",
+              "requirements": ["attack_1", "magic_1"]
+            },
+            {
+              "id": "destruction_3",
+              "name": "Мысленный Взрыв",
+              "description": "Вы можете бонусным действием сконцентрировать магическую энергию через речь. Ваше следующее заклинание, наносящее урон, получает +1d10 психического урона.",
+              "requirements": ["attack_1", "mind_4", "magic_1"]
+            }
+          ]
+        },
+        {
+          "id": "light",
+          "name": "Светлая Магия",
+          "color": "#1abc9c",
+          "icon": "✨",
+          "requirements": ["defense_1", "awareness_1"],
+          "talents": [
+            {
+              "id": "light_1",
+              "name": "Исцеляющий Свет",
+              "description": "Ваши заклинания и умения, восстанавливающие хиты, восстанавливают +2d20 хитов, а так же дают преимущество на следующее действие",
+              "requirements": ["defense_1", "awareness_1", "magic_3"]
+            },
+            {
+              "id": "light_2",
+              "name": "Аура Защиты",
+              "description": "Вы и союзники от вас получают +4 к КД. На 5 ходов",
+              "requirements": ["defense_4", "awareness_4"]
+            },
+            {
+              "id": "light_3",
+              "name": "Дар Предвидения",
+              "description": "Бонусным действием дать одному союзнику преимущество на его следующий спасбросок.",
+              "requirements": ["defense_1", "awareness_1"]
+            },
+            {
+              "id": "light_4",
+              "name": "Исцеляющее Слово",
+              "description": "Ваши мотивирующие речи также восстанавливают 3d20 всем союзникам, когда вы используете Мотивирующую Речь.",
+              "requirements": ["mind_3", "light_1"]
+            }
+          ]
+        },
+        {
+          "id": "dark",
+          "name": "Темная Магия",
+          "color": "#34495e",
+          "icon": "🌑",
+          "requirements": ["defense_1", "magic_3"],
+          "talents": [
+            {
+              "id": "dark_1",
+              "name": "Проклятая Земля",
+              "description": "Враги, начинающие свой ход, получают штраф -1d8 к своему следующему броску атаки или спасброску до начала вашего следующего хода. Только если они рядом с вами",
+              "requirements": ["defense_1", "magic_3"]
+            },
+            {
+              "id": "dark_2",
+              "name": "Поглощение Жизни",
+              "description": "Когда вы уменьшаете хиты существа до 0 с помощью заклинания разложения, вы получаете временные хиты, равные уровню заклинания и нанесеному урону (lvl x DMG)",
+              "requirements": ["defense_1", "magic_3"]
+            },
+            {
+              "id": "dark_3",
+              "name": "Проклятый Удар",
+              "description": "Когда вы попадаете атакой оружием, вы можете потратить ячейку заклинания, чтобы наложить на цель проклятие: цель получает 2d10 некротического урона и имеет помеху к спасброскам.",
+              "requirements": ["attack_1", "magic_3"]
+            }
+          ]
+        },
+        {
+          "id": "mind_magic",
+          "name": "Мысленная Магия",
+          "color": "#FF6B8B",
+          "icon": "🌀",
+          "requirements": ["mind_1", "magic_1"],
+          "talents": [
+            {
+              "id": "mind_magic_1",
+              "name": "Телепатическая Связь",
+              "description": "Вы можете установить телепатическую связь с одним существом. Существо может мысленно отвечать вам.",
+              "requirements": ["mind_1", "magic_1"]
+            },
+            {
+              "id": "mind_magic_2",
+              "name": "Ментальный Щит",
+              "description": "Вы получаете сопротивление к психическому урону и преимущество на спасброски против эффектов очарования и страха.",
+              "requirements": ["mind_2", "magic_1"]
+            },
+            {
+              "id": "mind_magic_3",
+              "name": "Иллюзорные Образы",
+              "description": "Вы можете бонусным действием создать иллюзию своего двойника. Атаки против вас имеют помеху, пока иллюзия активна.",
+              "requirements": ["mind_4", "magic_3"]
+            }
+          ]
+        },
+        {
+          "id": "shadow_magic",
+          "name": "Теневая Магия",
+          "color": "#2C3E50",
+          "icon": "🌑",
+          "requirements": ["stealth_2", "magic_1"],
+          "talents": [
+            {
+              "id": "shadow_magic_1",
+              "name": "Теневой Прыжок",
+              "description": "Будучи в тусклом свете или темноте, вы можете действием телепортироваться в другое место с такими же условиями освещения.",
+              "requirements": ["stealth_2", "magic_1"]
+            },
+            {
+              "id": "shadow_magic_2",
+              "name": "Магический Клинок",
+              "description": "Вы можете бонусным действием наделить своё оружие магией. Оно считается магическим для преодоления сопротивлений и получает +1к8 урона тем же типом (режущий/дробящий/колющий).",
+              "requirements": ["stealth_2", "magic_3"]
+            },
+            {
+              "id": "shadow_magic_3",
+              "name": "Лик Смерти",
+              "description": "Если вы атакуете из скрытности и попадаете, вы можете потратить ячейку заклинания, чтобы создать иллюзию чудовищной смерти для цели. Цель должна сделать спасбросок или быть испуганной вами до конца вашего следующего хода.",
+              "requirements": ["stealth_4", "magic_4"]
+            }
+          ]
+        },
+        {
+          "id": "resolve",
+          "name": "Решимость",
+          "color": "#A569BD",
+          "icon": "🧠🛡️",
+          "requirements": ["mind_2", "defense_2"],
+          "talents": [
+            {
+              "id": "resolve_1",
+              "name": "Волевая Броня",
+              "description": "Ваш ум настолько силён, что защищает тело. Вы получаете сопротивление психическому урону, а также можете использовать свой модификатор Интеллекта вместо Живучести для спасбросков от страха и очарования.",
+              "requirements": ["mind_2", "defense_2"]
+            },
+            {
+              "id": "resolve_2",
+              "name": "Контроль Эмоций",
+              "description": "Бонусным действием вы можете подавить на себе любой эффект страха или очарования на 1 раунд. Это не заканчивает эффект, но позволяет вам действовать так, как будто его нет.",
+              "requirements": ["mind_4", "defense_3"]
+            },
+            {
+              "id": "resolve_3",
+              "name": "Железная Воля Группы",
+              "description": "Если вы не захвачены врасплох, все союзники, которые вас слышат, получают преимущество на спасброски против страха и очарования. Вы не можете быть убеждены или принуждены магией к действиям против вашей группы.",
+              "requirements": ["awareness_2", "defense_4"]
+            }
+          ]
+        }
+      ],
+      "specialSchools": [
+        {
+          "id": "diplomacy",
+          "name": "Дипломатия",
+          "color": "#9b59b6",
+          "icon": "🤝",
+          "requirements": ["defense_1", "stealth_1"],
+          "talents": [
+            {
+              "id": "diplomacy_1",
+              "name": "Мастер Переговоров",
+              "description": "Вы получаете преимущество на проверки при взаимодействии с разумными существами.",
+              "requirements": ["defense_1", "stealth_1"]
+            },
+            {
+              "id": "diplomacy_2",
+              "name": "Чтение Намерений",
+              "description": "Бонусным действием вы можете попытаться определить истинные намерения существа. Проверка с преимуществом.",
+              "requirements": ["defense_1", "stealth_1"]
+            },
+            {
+              "id": "diplomacy_3",
+              "name": "Умиротворяющее Присутствие",
+              "description": "Вы можете действием попытаться успокоить одно разумное существо. Существо должно совершить спасбросок против Сл = 8 + ваш бонус мастерства.",
+              "requirements": ["diplomacy_1"]
+            },
+            {
+              "id": "diplomacy_4",
+              "name": "Политическая Интрига",
+              "description": "Вы получаете возможность создавать сложные социальные сети. Один раз в день вы можете получить информацию или небольшое одолжение от местных властей.",
+              "requirements": ["diplomacy_2"]
+            },
+            {
+              "id": "diplomacy_5",
+              "name": "Заключение Договора",
+              "description": "Вы можете создать магически обязывающее соглашение между двумя сторонами. Нарушивший договор получает проклятие по выбору мастера.",
+              "requirements": ["diplomacy_3", "magic_1"]
+            }
+          ]
+        },
+        {
+          "id": "trade",
+          "name": "Торговля",
+          "color": "#FFA500",
+          "icon": "💰",
+          "requirements": ["awareness_2", "diplomacy_1"],
+          "talents": [
+            {
+              "id": "trade_1",
+              "name": "Расчетливость",
+              "description": "Одноразовые зелья можно использовать два раза (кроме уникальных легендарных зелий). Эффект зелья остается прежним при повторном использовании.",
+              "requirements": ["awareness_2", "diplomacy_1"]
+            },
+            {
+              "id": "trade_2",
+              "name": "Искусство сделки",
+              "description": "При обмене предметами в магазинах цена ваших предметов для обмена увеличивается на 25%. Бартер становится более выгодным.",
+              "requirements": ["trade_1"]
+            },
+            {
+              "id": "trade_3",
+              "name": "Знакомое лицо",
+              "description": "Во всех магазинах предметы для покупки за золото дешевле на 15%. Торговцы узнают вас как постоянного клиента.",
+              "requirements": ["trade_1"]
+            },
+            {
+              "id": "trade_4",
+              "name": "Шкуродер",
+              "description": "С животных и монстров можно собрать на 50% больше полезных предметов (шкуры, клыки, органы и т.д.). Качество добычи также улучшается.",
+              "requirements": ["trade_2"]
+            },
+            {
+              "id": "trade_5",
+              "name": "Ночлег бесплатно",
+              "description": "В тавернах можно снять комнату за так (одна бесплатная комната в день). Торговцы в этом городе также более расположены к вам.",
+              "requirements": ["diplomacy_3", "stealth_3"]
+            }
+          ]
+        },
+        {
+          "id": "fate",
+          "name": "Судьба",
+          "color": "#000000",
+          "icon": "⏳",
+          "requirements": ["luck_2", "defense_4", "stealth_4"],
+          "talents": [
+            {
+              "id": "fate_1",
+              "name": "Чувство Смерти",
+              "description": "Вы всегда знаете, сколько хитов осталось у существа, на которое смотрите.",
+              "requirements": ["luck_2", "defense_4", "stealth_4"]
+            },
+            {
+              "id": "fate_2",
+              "name": "Роковая секунда",
+              "description": "Один раз в день, когда существо рядом с вами должно совершить спасбросок от смерти, вы можете вмешаться в судьбу. Результат броска становится либо 1 (провал), либо 20 (стабилизация) по вашему выбору.",
+              "requirements": ["fate_1"]
+            },
+            {
+              "id": "fate_3",
+              "name": "Нити Судьбы",
+              "description": "Вы можете один раз за длинный отдых, потратив 10 минут на медитацию, задать вопрос \"Что нас ждёт, если мы пойдём туда?\". И получить короткий, туманный, но правдивый ответ (одним-двумя словами, например: \"Смерть\", \"Богатство\", \"Пустота\").",
+              "requirements": ["luck_3", "awareness_4"]
+            }
+          ]
+        },
+        {
+          "id": "culinary",
+          "name": "Кулинария",
+          "color": "#E67E22",
+          "icon": "🍖",
+          "requirements": ["survival_2", "magic_6"],
+          "talents": [
+            {
+              "id": "culinary_1",
+              "name": "Шеф-повар дикой природы",
+              "description": "Вы можете готовить блюда из любых найденных ингредиентов, включая тех, кто на вас напал. Блюдо, приготовленное во время короткого или длительного отдыха, даёт всем, кто его ел, временные хиты, равные вашему уровню + ваш модификатор Интеллекта.",
+              "requirements": ["survival_2", "magic_6"]
+            },
+            {
+              "id": "culinary_2",
+              "name": "Изысканный вкус",
+              "description": "Ваше обострённое чувство вкуса позволяет вам определять ингредиенты в любом блюде или зелье, пробуя его (даже яды). Вы автоматически определяете, есть ли яд в пище, которую пробуете.",
+              "requirements": ["culinary_1"]
+            },
+            {
+              "id": "culinary_3",
+              "name": "Каннибальская сила",
+              "description": "Когда вы съедаете часть разумного существа (гуманоид, зверолюд и т.д.), вы получаете преимущество на броски атаки и проверки характеристик против существ того же вида на 1 час. Моральный аспект? Это уже твои проблемы.",
+              "requirements": ["culinary_1", "dark_1"]
+            },
+            {
+              "id": "culinary_4",
+              "name": "Адаптивная кухня",
+              "description": "Приготовив блюдо из существа, обладавшего сопротивлением или уязвимостью к определённому типу урона, вы и союзники, съевшие это блюдо, получаете сопротивление к этому типу урона на 1 час. Два блюда не комбинируются.",
+              "requirements": ["culinary_2", "defense_2"]
+            },
+            {
+              "id": "culinary_5",
+              "name": "Голодная ярость",
+              "description": "Если в начале боя у вас меньше половины максимальных хитов, вы можете войти в состояние голодной ярости. Вы получаете +2 к броскам атаки и урона, но теряете возможность различать союзников и врагов в ближнем бою (атакуйте ближайшее существо). Ярость заканчивается, когда вы восстанавливаете хиты выше половины.",
+              "requirements": ["culinary_3", "attack_2"]
+            }
+          ]
+        },
+        {
+          "id": "anomaly",
+          "name": "Аномалия",
+          "color": "#8E44AD",
+          "icon": "🌀",
+          "requirements": ["magic_4", "mind_4"],
+          "talents": [
+            {
+              "id": "anomaly_1",
+              "name": "Искажённое присутствие",
+              "description": "Ваше присутствие причиняет дискомфорт. Любое существо, начинающее свой ход в пределах, чувствует лёгкую тошноту. Оно получает -1 к броскам атаки и спасброскам, если только оно не имеет психической защиты или не является конструктом/нежитью.",
+              "requirements": ["magic_4", "mind_4"]
+            },
+            {
+              "id": "anomaly_2",
+              "name": "Размытое будущее",
+              "description": "Пророчества и предсказания на вас не работают. Вы автоматически проваливаете любые попытки других предсказать ваши действия, но и враги, пытающиеся предугадать ваш следующий ход, не могут получить преимущество против вас.",
+              "requirements": ["anomaly_1"]
+            },
+            {
+              "id": "anomaly_3",
+              "name": "Магический резонанс",
+              "description": "Когда вы накладываете заклинание, есть 10% шанс, что магия исказится и создаст случайный дополнительный эффект. Вы не можете контролировать этот эффект, но он никогда не навредит вам напрямую (может навредить всем остальным).",
+              "requirements": ["anomaly_1", "magic_3"]
+            },
+            {
+              "id": "anomaly_4",
+              "name": "Благословение джина",
+              "description": "Один раз в длительный отдых, когда вы проваливаете спасбросок или проверку характеристики, вы можете перебросить кубик, но результат переброса может быть любым от 1 до 30. Да, я серьёзно, кидай d30. Удачи.",
+              "requirements": ["anomaly_3", "luck_1"]
+            },
+            {
+              "id": "anomaly_5",
+              "name": "Ходячая аномалия",
+              "description": "Магия вокруг вас ведёт себя странно. Все заклинани, имеют 50% шанс не потребовать концентрацию в этом раунде, и 25% шанс сработать с удвоенной силой (удвоенные кубы урона/исцеления).",
+              "requirements": ["anomaly_3", "magic_7"]
+            }
+          ]
+        }
+      ],
+      "legendaryTalents": [
+        {
+          "id": "legendary_1",
+          "name": "Тюк по голове",
+          "color": "#d35400",
+          "icon": "👑",
+          "levelRequirement": 15,
+          "description": "Один раз в неделю в течение игровой сессии при попадании можно нанести максимальный урон оружием сложив в урон сумму плюсов к броскам от всех характеристик. Если это крит — урон умножается на 3 (четвертной).",
+          "requirements": ["attack_4", "awareness_4"]
+        },
+        {
+          "id": "legendary_2",
+          "name": "Тюк из темноты",
+          "color": "#8e44ad",
+          "icon": "👑",
+          "levelRequirement": 15,
+          "description": "Один раз в неделю в течение игровой сессии, атаки с преимуществом считаются критами при броске от 15. Натуральный 20 даёт урон ×3. Криты игнорируют сопротивление урону оружия.",
+          "requirements": ["stealth_2", "attack_2", "awareness_2"]
+        },
+        {
+          "id": "legendary_3",
+          "name": "Великий Переговорщик",
+          "color": "#16a085",
+          "icon": "👑",
+          "levelRequirement": 15,
+          "description": "Вы можете убедить любое разумное существо в своей правоте на 1 минуту, если это человек со своей волей. Существо получает помеху на спасбросок Мудрости. Чудовища и животные к вам благосклоны и будут пытаться договориться.",
+          "requirements": ["diplomacy_3", "defense_2"]
+        },
+        {
+          "id": "legendary_4",
+          "name": "Архимаг",
+          "color": "#8e44ad",
+          "icon": "👑",
+          "levelRequirement": 15,
+          "description": "Урон от заклинаний всегда максимальный и утраивается при наличии у цели уязвимости к магическому урону, +5 ячеек заклинаний. все эффекты заклинаний удваиваются.",
+          "requirements": ["magic_4", "destruction_1", "awareness_4"]
+        },
+        {
+          "id": "legendary_5",
+          "name": "Великий додеп",
+          "color": "#FFD700",
+          "icon": "💰",
+          "levelRequirement": 15,
+          "description": "Вы можете пожертвовать 1000 золотых монет любому храму или благотворительной организации. После этого ваш шанс получения легендарных предметов увеличивается на 5% до следующего длительного отдыха. Можно использовать 1 раз в неделю игрового времени.",
+          "requirements": ["luck_2", "diplomacy_2"]
+        },
+        {
+          "id": "legendary_6",
+          "name": "Купец-бакалейщик",
+          "color": "#FF8C00",
+          "icon": "🏪",
+          "levelRequirement": 15,
+          "description": "Имеете доступ к закрытым торгам и черным рынкам. Ворованные предметы всегда можно продать (никаких вопросов не задают). Все товары в магазинах дешевле на 50%. Еженедельно получаете информацию о редких товарах в регионе.",
+          "requirements": ["trade_4", "diplomacy_3"]
+        },
+        {
+          "id": "legendary_7",
+          "name": "Мега-ферамонмаксер",
+          "color": "#5D6D7E",
+          "icon": "👑",
+          "levelRequirement": 15,
+          "description": "Ваше присутствие подавляет слабых. Все враждебные существа с интеллектом ниже 8 должны каждый ход тратить своё Бонусное действие, чтобы не быть испуганными вами. Вы невосприимчивы к психическому урону и эффектам чтения мыслей.",
+          "requirements": ["resolve_3", "mind_magic_2"]
+        },
+        {
+          "id": "legendary_8",
+          "name": "Дух бесплодный",
+          "color": "#4A235A",
+          "icon": "👑",
+          "levelRequirement": 15,
+          "description": "Один раз в неделю вы можете шагнуть за грань реальности. На 1 минуту вы становитесь бесплотным (невидимым, проходите сквозь стены, получаете сопротивление ко всему урону), но не можете атаковать или взаимодействовать с материальным миром. Вы можете прервать эффект досрочно, чтобы появиться в любом месте, где были, и нанести урон существу, через которое проходите, равный 10к20 чистого урона.",
+          "requirements": ["fate_3", "shadow_magic_3"]
+        },
+        {
+          "id": "legendary_9",
+          "name": "Обжора",
+          "color": "#922B21",
+          "icon": "👑",
+          "levelRequirement": 15,
+          "description": "Вы можете съесть практически что угодно. Один раз в день вы можете поглотить магический предмет, заклинание или даже часть существа (например, сердце дракона), чтобы получить его свойства на 24 часа. Тока попробуй ту светящуюся хуйню сожрать падла.",
+          "requirements": ["culinary_5", "anomaly_4"]
+        },
+        {
+          "id": "legendary_10",
+          "name": "Вознесенный сэр ублюдок",
+          "color": "#F1C40F",
+          "icon": "👑",
+          "levelRequirement": 15,
+          "description": "Ты больше не полукровка. Ты просто легенда. Все существа, которые относятся к любой из твоих рас (люди, эльфы, зверолюди), изначально относятся к тебе с уважением. Ты получаешь +10 ко всем социальным взаимодействиям. Если кто-то называет тебя полукровкой прилюдно, он автоматически проигрывает словесный спор, и окружающие начинают его презирать.",
+          "requirements": ["diplomacy_5", "resolve_3", "anomaly_5"]
+        }
+      ],
+
+      mechanics: {
+        talentPointsPerLevel: [2, 4, 6, 8, 10, 12, 14, 16, 18, 20],
+        totalTalentPoints: 10,
+      },
+    };
+
+    // Состояние приложения
+    const state = {
+      characterLevel: 2,
+      talentPoints: 1,
+      learnedTalents: new Set(),
+      selectedTalent: null,
+      talentPointsSpent: 0,
+      extraPoints: 0,
+      currentFilter: "all",
+      currentSchool: "all",
+      searchQuery: "",
+    };
+
+    // Инициализация при загрузке страницы
+    document.addEventListener("DOMContentLoaded", function () {
+      initLevelDots();
+      renderAllTalents();
+      updateUI();
+      setupEventListeners();
+      applyFilters();
+    });
+
+    function initLevelDots() {
+      const dotsContainer = document.querySelector(".level-dots");
+      dotsContainer.innerHTML = "";
+
+      for (let i = 1; i <= 20; i++) {
+        const dot = document.createElement("div");
+        dot.className = "level-dot";
+
+        if (i <= state.characterLevel) {
+          dot.classList.add("active");
+          dot.title = `Уровень ${i}`;
+        }
+
+        if (talentData.mechanics.talentPointsPerLevel.includes(i)) {
+          dot.classList.add("talent-point");
+          dot.title = `Уровень ${i} - получение очка таланта`;
+        }
+
+        dot.addEventListener("click", () => {
+          state.characterLevel = i;
+          state.talentPoints = calculateTalentPoints();
+          initLevelDots();
+          updateUI();
+          renderAllTalents();
+          applyFilters();
+        });
+
+        dotsContainer.appendChild(dot);
+      }
+    }
+
+    function calculateTalentPoints() {
+      return (
+        talentData.mechanics.talentPointsPerLevel.filter(
+          (level) => level <= state.characterLevel
+        ).length -
+        state.talentPointsSpent +
+        state.extraPoints
+      );
+    }
+
+    function renderAllTalents() {
+      renderSchoolCategory("basicSchools", talentData.basicSchools, false);
+      renderSchoolCategory(
+        "advancedSchools",
+        talentData.advancedSchools,
+        true
+      );
+      renderSchoolCategory("specialSchools", talentData.specialSchools, true);
+      renderLegendaryTalents();
+    }
+
+    function renderSchoolCategory(containerId, schools, isAdvanced) {
+      const container = document.getElementById(containerId);
+      if (!container) return;
+
+      const talentsGrid = container.querySelector(".talents-grid");
+      if (!talentsGrid) return;
+
+      talentsGrid.innerHTML = "";
+
+      schools.forEach((school) => {
+        school.talents.forEach((talent) => {
+          const card = createTalentCard(talent, school, isAdvanced);
+          talentsGrid.appendChild(card);
+        });
+      });
+    }
+
+    function renderLegendaryTalents() {
+      const container = document.getElementById("legendaryTalents");
+      if (!container) return;
+
+      const talentsGrid = container.querySelector(".talents-grid");
+      if (!talentsGrid) return;
+
+      talentsGrid.innerHTML = "";
+
+      talentData.legendaryTalents.forEach((talent) => {
+        const card = createTalentCard(
+          talent,
+          {
+            name: "Легендарный",
+            color: talent.color,
+            icon: talent.icon,
+          },
+          true,
+          true
+        );
+        talentsGrid.appendChild(card);
+      });
+    }
+
+    function createTalentCard(
+      talent,
+      school,
+      isAdvanced = false,
+      isLegendary = false
+    ) {
+      const card = document.createElement("div");
+      card.className = "talent-card";
+      card.dataset.talentId = talent.id;
+      // Исправлено: для специальных школ используем 'special'
+      if (isLegendary) {
+        card.dataset.school = "legendary";
+      } else if (isAdvanced) {
+        if (school.id === "diplomacy" || school.id === "trade") {
+          card.dataset.school = "special";
+        } else {
+          card.dataset.school = "advanced";
+        }
+      } else {
+        card.dataset.school = "basic";
+      }
+
+      // Проверяем доступность таланта
+      const isLearned = state.learnedTalents.has(talent.id);
+      const requirementsMet = checkRequirements(talent);
+      const levelRequirementMet =
+        !isLegendary ||
+        (isLegendary &&
+          state.characterLevel >= (talent.levelRequirement || 15));
+
+      // Проверяем требования школы для продвинутых школ
+      let schoolRequirementsMet = true;
+      if (isAdvanced && school.requirements) {
+        schoolRequirementsMet = school.requirements.every((req) =>
+          state.learnedTalents.has(req)
+        );
+      }
+
+      const canLearn =
+        requirementsMet &&
+        state.talentPoints > 0 &&
+        levelRequirementMet &&
+        schoolRequirementsMet;
+
+      // Определяем класс карточки
+      if (isLearned) {
+        card.classList.add("learned");
+      } else if (canLearn) {
+        card.classList.add("available");
+      } else if (
+        !requirementsMet ||
+        !levelRequirementMet ||
+        !schoolRequirementsMet
+      ) {
+        card.classList.add("requirements-not-met");
+      } else {
+        card.classList.add("unavailable");
+      }
+
+      // Создаем содержимое карточки
+      const shortDescription =
+        talent.description.length > 120
+          ? talent.description.substring(0, 120) + "..."
+          : talent.description;
+
+      card.innerHTML = `
+                <div class="talent-name">${school.icon} ${talent.name}</div>
+                <div class="talent-school" style="background: ${school.color
+        }20; color: ${school.color}">
+                    ${school.name}
+                </div>
+                <div class="talent-description">${shortDescription}</div>
+                
+                ${talent.requirements && talent.requirements.length > 0
+          ? `
+                    <div class="requirements-badge ${requirementsMet ? "met" : ""
+          }">
+                        Треб: ${talent.requirements.length}
+                    </div>
+                `
+          : ""
+        }
+                
+                ${isLearned ? '<div class="learned-badge">✓ Выучено</div>' : ""}
+                
+                ${isLegendary
+          ? `<div class="requirements-badge" style="top: 35px; background: rgba(211, 84, 0, 0.2); color: #d35400; border-color: #d35400;">
+                    Ур. ${talent.levelRequirement || 15}+
+                </div>`
+          : ""
+        }
+                
+                ${isAdvanced && school.requirements && !schoolRequirementsMet
+          ? `
+                    <div class="requirements-badge" style="top: ${talent.requirements && talent.requirements.length > 0
+            ? "60px"
+            : "35px"
+          }; background: rgba(231, 76, 60, 0.2); color: #e74c3c; border-color: #e74c3c;">
+                        Школа закрыта
+                    </div>
+                `
+          : ""
+        }
+            `;
+
+      // Добавляем обработчик клика
+      card.addEventListener("click", () => {
+        if (
+          !card.classList.contains("unavailable") ||
+          card.classList.contains("requirements-not-met")
+        ) {
+          selectTalent(talent, school);
+        }
+      });
+
+      return card;
+    }
+
+    function checkRequirements(talent) {
+      if (!talent.requirements) return true;
+      return talent.requirements.every((req) =>
+        state.learnedTalents.has(req)
+      );
+    }
+
+    function selectTalent(talent, school) {
+      state.selectedTalent = { talent, school };
+
+      const isLearned = state.learnedTalents.has(talent.id);
+      const requirementsMet = checkRequirements(talent);
+      const levelRequirementMet =
+        !talent.levelRequirement ||
+        state.characterLevel >= talent.levelRequirement;
+
+      // Проверяем требования школы для продвинутых школ
+      let schoolRequirementsMet = true;
+      if (
+        school.requirements &&
+        talentData.advancedSchools.some((s) => s.id === school.id)
+      ) {
+        schoolRequirementsMet = school.requirements.every((req) =>
+          state.learnedTalents.has(req)
+        );
+      }
+
+      const canLearn =
+        requirementsMet &&
+        state.talentPoints > 0 &&
+        levelRequirementMet &&
+        schoolRequirementsMet &&
+        !isLearned;
+
+      document.getElementById("learnBtn").disabled = !canLearn;
+
+      // Отображаем детали таланта
+      const detailsDiv = document.getElementById("talentDetails");
+
+      let requirementsHtml = "";
+      if (talent.requirements && talent.requirements.length > 0) {
+        requirementsHtml = `
+                    <div class="requirements ${requirementsMet ? "met" : ""}">
+                        <strong>Требования таланта:</strong><br>
+                        ${talent.requirements
+            .map((reqId) => {
+              const reqTalent = findTalentById(reqId);
+              const learned = state.learnedTalents.has(reqId);
+              const reqText = reqTalent
+                ? `${reqTalent.name} (${reqId})`
+                : reqId;
+              return `${learned ? "✓" : "✗"} ${reqText}`;
+            })
+            .join("<br>")}
+                    </div>
+                `;
+      }
+
+      let schoolRequirementsHtml = "";
+      if (
+        school.requirements &&
+        talentData.advancedSchools.some((s) => s.id === school.id)
+      ) {
+        schoolRequirementsHtml = `
+                    <div class="requirements ${schoolRequirementsMet ? "met" : ""
+          }">
+                        <strong>Требования школы (${school.name}):</strong><br>
+                        ${school.requirements
+            .map((reqId) => {
+              const reqTalent = findTalentById(reqId);
+              const learned = state.learnedTalents.has(reqId);
+              const reqText = reqTalent
+                ? `${reqTalent.name} (${reqId})`
+                : reqId;
+              return `${learned ? "✓" : "✗"} ${reqText}`;
+            })
+            .join("<br>")}
+                    </div>
+                `;
+      }
+
+      let levelRequirementHtml = "";
+      if (talent.levelRequirement) {
+        levelRequirementHtml = `
+                    <div class="requirements ${state.characterLevel >= talent.levelRequirement
+            ? "met"
+            : ""
+          }">
+                        <strong>Требование уровня:</strong><br>
+                        ${state.characterLevel >= talent.levelRequirement
+            ? "✓"
+            : "✗"
+          } Уровень ${talent.levelRequirement}+ (текущий: ${state.characterLevel
+          })
+                    </div>
+                `;
+      }
+
+      let statusHtml = "";
+      if (isLearned) {
+        statusHtml =
+          '<div style="color: #f1c40f; margin-top: 15px; padding: 10px; background: rgba(241, 196, 15, 0.1); border-radius: 5px;">✓ Талант уже выучен</div>';
+      } else if (
+        !requirementsMet ||
+        !levelRequirementMet ||
+        !schoolRequirementsMet
+      ) {
+        statusHtml =
+          '<div style="color: #e74c3c; margin-top: 15px; padding: 10px; background: rgba(231, 76, 60, 0.1); border-radius: 5px;">✗ Требования не выполнены</div>';
+      } else if (canLearn) {
+        statusHtml =
+          '<div style="color: #2ecc71; margin-top: 15px; padding: 10px; background: rgba(46, 204, 113, 0.1); border-radius: 5px;">✓ Доступен для изучения</div>';
+      }
+
+      detailsDiv.innerHTML = `
+                <div class="talent-name-large">${school.icon} ${talent.name}</div>
+                <div class="talent-school" style="background: ${school.color}20; color: ${school.color}; display: inline-block; margin-bottom: 15px;">
+                    ${school.name}
+                </div>
+                <div class="talent-description">${talent.description}</div>
+                
+                ${requirementsHtml}
+                ${schoolRequirementsHtml}
+                ${levelRequirementHtml}
+                ${statusHtml}
+            `;
+
+      updateUI();
+    }
+
+    function findTalentById(talentId) {
+      // Ищем во всех школах
+      const allSchools = [
+        ...talentData.basicSchools,
+        ...talentData.advancedSchools,
+        ...talentData.specialSchools,
+      ];
+
+      for (const school of allSchools) {
+        const talent = school.talents.find((t) => t.id === talentId);
+        if (talent) return talent;
+      }
+
+      // Ищем в легендарных
+      for (const talent of talentData.legendaryTalents) {
+        if (talent.id === talentId) return talent;
+      }
+
+      return null;
+    }
+
+    function applyFilters() {
+      const searchQuery = state.searchQuery.toLowerCase();
+      const filter = state.currentFilter;
+      const schoolFilter = state.currentSchool;
+
+      // Получаем все карточки талантов
+      const allCards = document.querySelectorAll(".talent-card");
+      let visibleCount = 0;
+      let anySchoolVisible = false;
+
+      // Сначала скрываем все
+      allCards.forEach((card) => {
+        card.classList.add("hidden");
+      });
+
+      // Скрываем все категории школ
+      document.querySelectorAll(".school-category").forEach((category) => {
+        category.style.display = "none";
+      });
+
+      // Фильтруем карточки
+      allCards.forEach((card) => {
+        const isLearned = card.classList.contains("learned");
+        const isAvailable = card.classList.contains("available");
+        const isRequirementsNotMet = card.classList.contains(
+          "requirements-not-met"
+        );
+        const talentSchool = card.dataset.school;
+
+        // Проверяем фильтр по школе
+        const schoolMatch =
+          schoolFilter === "all" || talentSchool === schoolFilter;
+
+        // Проверяем фильтр по статусу
+        let statusMatch = false;
+        switch (filter) {
+          case "all":
+            statusMatch = true;
+            break;
+          case "available":
+            statusMatch = isAvailable;
+            break;
+          case "learned":
+            statusMatch = isLearned;
+            break;
+          case "requirements-not-met":
+            statusMatch = isRequirementsNotMet;
+            break;
+        }
+
+        // Проверяем поисковый запрос
+        const talentName = card
+          .querySelector(".talent-name")
+          .textContent.toLowerCase();
+        const talentDescription = card
+          .querySelector(".talent-description")
+          .textContent.toLowerCase();
+        const searchMatch =
+          searchQuery === "" ||
+          talentName.includes(searchQuery) ||
+          talentDescription.includes(searchQuery);
+
+        // Показываем карточку, если все условия выполнены
+        if (schoolMatch && statusMatch && searchMatch) {
+          card.classList.remove("hidden");
+          visibleCount++;
+
+          // Показываем родительскую категорию
+          const category = card.closest(".school-category");
+          if (category) {
+            category.style.display = "block";
+            anySchoolVisible = true;
+          }
+        }
+      });
+
+      // Если ничего не найдено, показываем сообщение
+      const talentsContainer = document.querySelector(".talents-container");
+      let noResultsMsg = talentsContainer.querySelector(".no-results");
+
+      if (visibleCount === 0) {
+        if (!noResultsMsg) {
+          noResultsMsg = document.createElement("div");
+          noResultsMsg.className = "no-results";
+          noResultsMsg.textContent =
+            "Таланты не найдены. Попробуйте изменить фильтры или поисковый запрос.";
+          talentsContainer.appendChild(noResultsMsg);
+        }
+      } else if (noResultsMsg) {
+        noResultsMsg.remove();
+      }
+    }
+
+    function learnTalent() {
+      if (!state.selectedTalent) return;
+
+      const { talent, school } = state.selectedTalent;
+
+      if (state.learnedTalents.has(talent.id)) {
+        alert("Этот талант уже выучен!");
+        return;
+      }
+
+      if (!checkRequirements(talent)) {
+        alert("Требования не выполнены!");
+        return;
+      }
+
+      if (
+        talent.levelRequirement &&
+        state.characterLevel < talent.levelRequirement
+      ) {
+        alert(
+          `Для этого таланта требуется уровень ${talent.levelRequirement}+!`
+        );
+        return;
+      }
+
+      // Проверяем требования школы для продвинутых школ
+      if (
+        school.requirements &&
+        talentData.advancedSchools.some((s) => s.id === school.id)
+      ) {
+        const schoolRequirementsMet = school.requirements.every((req) =>
+          state.learnedTalents.has(req)
+        );
+        if (!schoolRequirementsMet) {
+          alert("Требования школы не выполнены!");
+          return;
+        }
+      }
+
+      if (state.talentPoints <= 0) {
+        alert("Недостаточно очков талантов!");
+        return;
+      }
+
+      state.learnedTalents.add(talent.id);
+      state.talentPoints--;
+      state.talentPointsSpent++;
+
+      updateUI();
+      renderAllTalents();
+      applyFilters();
+      document.getElementById("learnBtn").disabled = true;
+
+      // Обновляем список выбранных талантов
+      updateSelectedTalentsList();
+    }
+
+    function updateSelectedTalentsList() {
+      const list = document.getElementById("selectedTalentsList");
+      list.innerHTML = "";
+
+      Array.from(state.learnedTalents).forEach((talentId) => {
+        const talent = findTalentById(talentId);
+        if (talent) {
+          const li = document.createElement("li");
+          li.innerHTML = `
+                        <span>${talent.name}</span>
+                        <button class="remove-talent" data-talent-id="${talentId}">×</button>
+                    `;
+          list.appendChild(li);
+        }
+      });
+
+      // Добавляем обработчики для кнопок удаления
+      document.querySelectorAll(".remove-talent").forEach((button) => {
+        button.addEventListener("click", function (e) {
+          e.stopPropagation();
+          const talentId = this.dataset.talentId;
+          removeTalent(talentId);
+        });
+      });
+    }
+
+    function removeTalent(talentId) {
+      if (confirm("Удалить этот талант?")) {
+        state.learnedTalents.delete(talentId);
+        state.talentPoints++;
+        state.talentPointsSpent--;
+
+        // Если удаляем талант, от которого зависят другие, спрашиваем
+        const dependentTalents = findDependentTalents(talentId);
+        if (dependentTalents.length > 0) {
+          if (
+            confirm(
+              `Этот талант требуется для: ${dependentTalents
+                .map((t) => t.name)
+                .join(", ")}. Удалить их тоже?`
+            )
+          ) {
+            dependentTalents.forEach((t) => {
+              state.learnedTalents.delete(t.id);
+              state.talentPoints++;
+              state.talentPointsSpent--;
+            });
+          }
+        }
+
+        updateUI();
+        renderAllTalents();
+        applyFilters();
+        updateSelectedTalentsList();
+
+        // Сбрасываем выбранный талант, если он был удален
+        if (
+          state.selectedTalent &&
+          state.selectedTalent.talent.id === talentId
+        ) {
+          state.selectedTalent = null;
+          document.getElementById("talentDetails").innerHTML =
+            "<p>Нажмите на талант в таблице, чтобы увидеть его описание</p>";
+          document.getElementById("learnBtn").disabled = true;
+        }
+      }
+    }
+
+    function findDependentTalents(talentId) {
+      const dependent = [];
+
+      // Проверяем все таланты на наличие requirements
+      const allTalents = [];
+      talentData.basicSchools.forEach((s) => allTalents.push(...s.talents));
+      talentData.advancedSchools.forEach((s) =>
+        allTalents.push(...s.talents)
+      );
+      talentData.specialSchools.forEach((s) => allTalents.push(...s.talents));
+      talentData.legendaryTalents.forEach((t) => allTalents.push(t));
+
+      allTalents.forEach((talent) => {
+        if (talent.requirements && talent.requirements.includes(talentId)) {
+          if (state.learnedTalents.has(talent.id)) {
+            dependent.push(talent);
+          }
+        }
+      });
+
+      return dependent;
+    }
+
+    function resetAll() {
+      if (confirm("Вы уверены, что хотите сбросить все выученные таланты?")) {
+        state.learnedTalents.clear();
+        state.talentPoints = calculateTalentPoints();
+        state.talentPointsSpent = 0;
+        state.extraPoints = 0;
+        state.selectedTalent = null;
+        updateUI();
+        renderAllTalents();
+        applyFilters();
+        document.getElementById("talentDetails").innerHTML =
+          "<p>Нажмите на талант в таблице, чтобы увидеть его описание</p>";
+        document.getElementById("selectedTalentsList").innerHTML = "";
+        document.getElementById("learnBtn").disabled = true;
+      }
+    }
+
+    function exportBuild() {
+      const build = {
+        characterLevel: state.characterLevel,
+        talentPoints: state.talentPoints,
+        extraPoints: state.extraPoints,
+        learnedTalents: Array.from(state.learnedTalents).map((id) => {
+          const talent = findTalentById(id);
+          const school = findSchoolByTalentId(id);
+          return talent
+            ? {
+              name: talent.name,
+              id: talent.id,
+              school: school?.name || "Неизвестно",
+              description: talent.description.substring(0, 100) + "...",
+            }
+            : { id };
+        }),
+        totalTalentsLearned: state.learnedTalents.size,
+        buildSummary: `Уровень: ${state.characterLevel}\nОчков талантов: ${state.talentPoints
+          }/${talentData.mechanics.totalTalentPoints + state.extraPoints
+          }\nДополнительные очки: ${state.extraPoints}\nВыучено талантов: ${state.learnedTalents.size
+          }`,
+      };
+
+      const buildString = `=== БИЛД ПЕРСОНАЖА D&D ===
+
+${build.buildSummary}
+
+ВЫБРАННЫЕ ТАЛАНТЫ:
+${build.learnedTalents
+          .map((t, i) => `${i + 1}. ${t.name} (${t.school})\n   ${t.description}`)
+          .join("\n\n")}
+
+=== Экспортировано из Таблицы Талантов D&D ===`;
+
+      // Создаем временный элемент для копирования
+      const textarea = document.createElement("textarea");
+      textarea.value = buildString;
+      document.body.appendChild(textarea);
+      textarea.select();
+      document.execCommand("copy");
+      document.body.removeChild(textarea);
+
+      alert(
+        "Билд скопирован в буфер обмена!\n\nСохраните его для использования в игре."
+      );
+    }
+
+    function findSchoolByTalentId(talentId) {
+      // Ищем во всех школах
+      const allSchools = [
+        ...talentData.basicSchools,
+        ...talentData.advancedSchools,
+        ...talentData.specialSchools,
+      ];
+
+      for (const school of allSchools) {
+        if (school.talents.find((t) => t.id === talentId)) {
+          return school;
+        }
+      }
+
+      // Проверяем легендарные
+      if (talentData.legendaryTalents.find((t) => t.id === talentId)) {
+        return { name: "Легендарный" };
+      }
+
+      return null;
+    }
+
+    // Функция для отображения всех активных бонусов
+    function showAllBonuses() {
+      const modal = document.getElementById("bonusesModal");
+      const content = document.getElementById("bonusesContent");
+
+      // Получаем все выученные таланты
+      const learnedTalents = Array.from(state.learnedTalents)
+        .map((id) => findTalentById(id))
+        .filter((talent) => talent);
+
+      // Группируем бонусы по категориям
+      const bonuses = {
+        attack: [],
+        defense: [],
+        magic: [],
+        initiative: [],
+        saves: [],
+        skills: [],
+        misc: [],
+      };
+
+      learnedTalents.forEach((talent) => {
+        const description = talent.description;
+
+        // Анализируем описание таланта для извлечения бонусов
+        if (
+          description.includes("+") ||
+          description.includes("преимущество") ||
+          description.includes("бонус") ||
+          description.includes("КД") ||
+          description.includes("сопротивление") ||
+          description.includes("урон")
+        ) {
+          let category = "misc";
+
+          // Определяем категорию по ключевым словам
+          if (
+            description.includes("атак") ||
+            description.includes("урон") ||
+            description.includes("критическ") ||
+            description.includes("попадан")
+          ) {
+            category = "attack";
+          } else if (
+            description.includes("КД") ||
+            description.includes("сопротивлен") ||
+            description.includes("защит") ||
+            description.includes("хит")
+          ) {
+            category = "defense";
+          } else if (
+            description.includes("заклинани") ||
+            description.includes("маги") ||
+            description.includes("мана") ||
+            description.includes("ячейк")
+          ) {
+            category = "magic";
+          } else if (
+            description.includes("инициати") ||
+            description.includes("ход") ||
+            description.includes("действие")
+          ) {
+            category = "initiative";
+          } else if (
+            description.includes("спасброс") ||
+            description.includes("проверк")
+          ) {
+            category = "saves";
+          } else if (
+            description.includes("навык") ||
+            description.includes("Скрытност") ||
+            description.includes("Убеждени") ||
+            description.includes("Запугивани")
+          ) {
+            category = "skills";
+          }
+
+          bonuses[category].push({
+            name: talent.name,
+            description: description,
+            shortBonus: extractBonusFromDescription(description),
+          });
+        }
+      });
+
+      // Формируем HTML для модального окна
+      let html = "";
+
+      // Атака
+      if (bonuses.attack.length > 0) {
+        html += `
+            <div class="bonus-section" style="border-left-color: #e74c3c;">
+              <h3><span style="color: #e74c3c;">⚔️</span> Бонусы к атаке и урону</h3>
+              <ul class="bonus-list">
+                ${bonuses.attack
+            .map(
+              (b) => `
+                  <li>
+                    <div>
+                      <strong>${b.name}</strong>
+                      <div class="bonus-talent-name">${b.shortBonus}</div>
+                    </div>
+                  </li>
+                `
+            )
+            .join("")}
+              </ul>
+            </div>
+          `;
+      }
+
+      // Защита
+      if (bonuses.defense.length > 0) {
+        html += `
+            <div class="bonus-section" style="border-left-color: #3498db;">
+              <h3><span style="color: #3498db;">🛡️</span> Бонусы к защите</h3>
+              <ul class="bonus-list">
+                ${bonuses.defense
+            .map(
+              (b) => `
+                  <li>
+                    <div>
+                      <strong>${b.name}</strong>
+                      <div class="bonus-talent-name">${b.shortBonus}</div>
+                    </div>
+                  </li>
+                `
+            )
+            .join("")}
+              </ul>
+            </div>
+          `;
+      }
+
+      // Магия
+      if (bonuses.magic.length > 0) {
+        html += `
+            <div class="bonus-section" style="border-left-color: #9b59b6;">
+              <h3><span style="color: #9b59b6;">🔮</span> Магические бонусы</h3>
+              <ul class="bonus-list">
+                ${bonuses.magic
+            .map(
+              (b) => `
+                  <li>
+                    <div>
+                      <strong>${b.name}</strong>
+                      <div class="bonus-talent-name">${b.shortBonus}</div>
+                    </div>
+                  </li>
+                `
+            )
+            .join("")}
+              </ul>
+            </div>
+          `;
+      }
+
+      // Инициатива и действия
+      if (bonuses.initiative.length > 0) {
+        html += `
+            <div class="bonus-section" style="border-left-color: #2ecc71;">
+              <h3><span style="color: #2ecc71;">⚡</span> Инициатива и действия</h3>
+              <ul class="bonus-list">
+                ${bonuses.initiative
+            .map(
+              (b) => `
+                  <li>
+                    <div>
+                      <strong>${b.name}</strong>
+                      <div class="bonus-talent-name">${b.shortBonus}</div>
+                    </div>
+                  </li>
+                `
+            )
+            .join("")}
+              </ul>
+            </div>
+          `;
+      }
+
+      // Спасброски
+      if (bonuses.saves.length > 0) {
+        html += `
+            <div class="bonus-section" style="border-left-color: #f1c40f;">
+              <h3><span style="color: #f1c40f;">🎯</span> Бонусы к спасброскам</h3>
+              <ul class="bonus-list">
+                ${bonuses.saves
+            .map(
+              (b) => `
+                  <li>
+                    <div>
+                      <strong>${b.name}</strong>
+                      <div class="bonus-talent-name">${b.shortBonus}</div>
+                    </div>
+                  </li>
+                `
+            )
+            .join("")}
+              </ul>
+            </div>
+          `;
+      }
+
+      // Навыки
+      if (bonuses.skills.length > 0) {
+        html += `
+            <div class="bonus-section" style="border-left-color: #FF6B8B;">
+              <h3><span style="color: #FF6B8B;">🧠</span> Бонусы к навыкам</h3>
+              <ul class="bonus-list">
+                ${bonuses.skills
+            .map(
+              (b) => `
+                  <li>
+                    <div>
+                      <strong>${b.name}</strong>
+                      <div class="bonus-talent-name">${b.shortBonus}</div>
+                    </div>
+                  </li>
+                `
+            )
+            .join("")}
+              </ul>
+            </div>
+          `;
+      }
+
+      // Прочие
+      if (bonuses.misc.length > 0) {
+        html += `
+            <div class="bonus-section" style="border-left-color: #7f8c8d;">
+              <h3><span style="color: #7f8c8d;">🌟</span> Прочие бонусы</h3>
+              <ul class="bonus-list">
+                ${bonuses.misc
+            .map(
+              (b) => `
+                  <li>
+                    <div>
+                      <strong>${b.name}</strong>
+                      <div class="bonus-talent-name">${b.shortBonus}</div>
+                    </div>
+                  </li>
+                `
+            )
+            .join("")}
+              </ul>
+            </div>
+          `;
+      }
+
+      if (html === "") {
+        html =
+          '<p style="text-align: center; color: #95a5a6; padding: 20px;">У вас еще нет выученных талантов с бонусами.</p>';
+      }
+
+      content.innerHTML = html;
+      modal.style.display = "flex";
+    }
+
+    // Функция для извлечения краткого описания бонуса
+    function extractBonusFromDescription(description) {
+      const lowerDesc = description.toLowerCase();
+      let bonus = "";
+
+      // Ищем числовые бонусы
+      const numberMatches = description.match(/\+(\d+[d\d]*)\b/g);
+      if (numberMatches) {
+        bonus = numberMatches.join(", ");
+      }
+
+      // Ищем преимущество/помеху
+      if (lowerDesc.includes("преимущество")) {
+        bonus += (bonus ? ", " : "") + "Преимущество";
+      }
+      if (lowerDesc.includes("помеха") || lowerDesc.includes("помеху")) {
+        bonus += (bonus ? ", " : "") + "Помеха врагам";
+      }
+
+      // Ищем увеличение КД
+      if (lowerDesc.includes("кд") || lowerDesc.includes("класс брони")) {
+        const kdMatch = description.match(/КД.*?(\+\d+)/);
+        if (kdMatch) {
+          bonus += (bonus ? ", " : "") + kdMatch[1] + " к КД";
+        }
+      }
+
+      // Ищем сопротивление
+      if (lowerDesc.includes("сопротивление")) {
+        bonus += (bonus ? ", " : "") + "Сопротивление урону";
+      }
+
+      // Если ничего не найдено, возвращаем сокращенное описание
+      if (!bonus) {
+        bonus =
+          description.length > 80
+            ? description.substring(0, 80) + "..."
+            : description;
+      }
+
+      return bonus;
+    }
+
+    function updateUI() {
+      document.getElementById("levelDisplay").textContent =
+        state.characterLevel;
+      const totalBasePoints = talentData.mechanics.totalTalentPoints;
+      const totalPoints = totalBasePoints + state.extraPoints;
+      document.getElementById("talentPoints").textContent =
+        state.talentPoints;
+      document.getElementById("totalTalentPoints").textContent = totalPoints;
+
+      // Показываем дополнительные очки
+      const extraPointsDisplay =
+        document.getElementById("extraPointsDisplay");
+      if (state.extraPoints > 0) {
+        extraPointsDisplay.textContent = `(+${state.extraPoints})`;
+      } else {
+        extraPointsDisplay.textContent = "";
+      }
+
+      document.getElementById("talentsLearned").textContent =
+        state.learnedTalents.size;
+    }
+
+    function addExtraPoint(type) {
+      let confirmMessage = "";
+      let pointName = "";
+
+      switch (type) {
+        case "quest":
+          confirmMessage =
+            "Добавить очко таланта за выполнение важного квеста?";
+          pointName = "за квест";
+          break;
+        case "story":
+          confirmMessage =
+            "Добавить очко таланта за важное событие в истории персонажа?";
+          pointName = "за историю";
+          break;
+        case "achievement":
+          confirmMessage = "Добавить очко таланта за особое достижение?";
+          pointName = "за достижение";
+          break;
+      }
+
+      if (confirm(confirmMessage)) {
+        state.extraPoints++;
+        state.talentPoints++;
+        updateUI();
+        renderAllTalents();
+        applyFilters();
+        alert(`Добавлено дополнительное очко таланта ${pointName}!`);
+      }
+    }
+
+    function setupEventListeners() {
+      document
+        .getElementById("learnBtn")
+        .addEventListener("click", learnTalent);
+      document.getElementById("resetBtn").addEventListener("click", resetAll);
+      document
+        .getElementById("exportBtn")
+        .addEventListener("click", exportBuild);
+
+      // Кнопка для показа бонусов
+      document
+        .getElementById("bonusesBtn")
+        .addEventListener("click", showAllBonuses);
+
+      // Закрытие модального окна
+      document.getElementById("closeModal").addEventListener("click", () => {
+        document.getElementById("bonusesModal").style.display = "none";
+      });
+
+      // Закрытие модального окна при клике на оверлей
+      document
+        .getElementById("bonusesModal")
+        .addEventListener("click", (e) => {
+          if (e.target === document.getElementById("bonusesModal")) {
+            document.getElementById("bonusesModal").style.display = "none";
+          }
+        });
+
+      // Закрытие модального окна при нажатии ESC
+      document.addEventListener("keydown", (e) => {
+        if (e.key === "Escape") {
+          document.getElementById("bonusesModal").style.display = "none";
+        }
+      });
+
+      // Кнопки дополнительных очков
+      document
+        .getElementById("addQuestPoint")
+        .addEventListener("click", () => addExtraPoint("quest"));
+      document
+        .getElementById("addStoryPoint")
+        .addEventListener("click", () => addExtraPoint("story"));
+      document
+        .getElementById("addAchievementPoint")
+        .addEventListener("click", () => addExtraPoint("achievement"));
+
+      // Фильтры
+      document.querySelectorAll(".filter-btn[data-filter]").forEach((btn) => {
+        btn.addEventListener("click", function () {
+          // Убираем активный класс у всех кнопок фильтров
+          document
+            .querySelectorAll(".filter-btn[data-filter]")
+            .forEach((b) => b.classList.remove("active"));
+          // Добавляем активный класс текущей кнопке
+          this.classList.add("active");
+          state.currentFilter = this.dataset.filter;
+          applyFilters();
+        });
+      });
+
+      // Фильтры школ
+      document.querySelectorAll(".filter-btn[data-school]").forEach((btn) => {
+        btn.addEventListener("click", function () {
+          // Убираем активный класс у всех кнопок школ
+          document
+            .querySelectorAll(".filter-btn[data-school]")
+            .forEach((b) => b.classList.remove("active"));
+          // Добавляем активный класс текущей кнопке
+          this.classList.add("active");
+          state.currentSchool = this.dataset.school;
+          applyFilters();
+        });
+      });
+
+      // Поиск
+      const searchInput = document.getElementById("talentSearch");
+      let searchTimeout;
+      searchInput.addEventListener("input", function () {
+        clearTimeout(searchTimeout);
+        searchTimeout = setTimeout(() => {
+          state.searchQuery = this.value;
+          applyFilters();
+        }, 300);
+      });
+
+      // Очистка поиска при нажатии ESC
+      searchInput.addEventListener("keydown", function (e) {
+        if (e.key === "Escape") {
+          this.value = "";
+          state.searchQuery = "";
+          applyFilters();
+        }
+      });
+    }
+  </script>
+</body>
+
+</html>
