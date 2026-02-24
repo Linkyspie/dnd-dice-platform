@@ -1,0 +1,392 @@
+<!DOCTYPE html>
+<html lang="ru">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>D&D Dice Platform - Мультипользовательский режим</title>
+    <link rel="stylesheet" href="style.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <link rel="icon"
+        href="data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 100 100%22><text y=%22.9em%22 font-size=%2290%22>🎲</text></svg>">
+</head>
+
+<body>
+    <div class="container">
+        <header>
+            <div class="header-top">
+                <h1><i class="fas fa-dice-d20"></i> D&D Dice Platform</h1>
+                <div class="server-status">
+                    <span id="connection-status" class="status-offline">
+                        <i class="fas fa-circle"></i> Отключено
+                    </span>
+                    <span class="online-count">
+                        <i class="fas fa-users"></i> <span id="online-count">0</span> онлайн
+                    </span>
+                </div>
+            </div>
+            <div class="user-controls">
+                <div class="user-info">
+                    <span class="user-avatar" id="user-avatar">🎲</span>
+                    <span class="username" id="username">Загрузка...</span>
+                    <button id="change-name-btn" title="Изменить имя"><i class="fas fa-edit"></i></button>
+                </div>
+                <div class="server-stats">
+                    <span><i class="fas fa-dice"></i> Всего бросков: <span id="total-rolls">0</span></span>
+                    <span class="stat-separator">•</span>
+                    <span><i class="fas fa-history"></i> В логе: <span id="log-count">0</span></span>
+                </div>
+            </div>
+        </header>
+
+        <main>
+
+            <!-- Кнопка открытия панели персонажей -->
+            <button id="toggle-characters" class="characters-toggle" title="Персонажи">
+                <i class="fas fa-users"></i> Персонажи
+            </button>
+
+            <!-- Боковая панель персонажей -->
+            <div id="characters-panel" class="characters-panel">
+                <!-- Заголовок панели -->
+                <div class="panel-header">
+                    <h2><i class="fas fa-user-friends"></i> Управление персонажами</h2>
+                    <button id="close-characters" class="close-btn">
+                        <i class="fas fa-times"></i>
+                    </button>
+                </div>
+
+                <!-- Вкладки -->
+                <div class="characters-tabs">
+                    <div class="tabs-header">
+                        <button class="tab-btn active" data-tab="characters-list">
+                            <i class="fas fa-list"></i> Все персонажи
+                        </button>
+                        <button class="tab-btn" data-tab="party-notes">
+                            <i class="fas fa-scroll"></i> Заметки партии
+                        </button>
+                        <button class="tab-btn" data-tab="backup">
+                            <i class="fas fa-database"></i> Бэкап
+                        </button>
+                    </div>
+
+                    <!-- Контент вкладок -->
+                    <div class="tabs-content">
+                        <!-- Вкладка: Список персонажей -->
+                        <div id="characters-list" class="tab-content active">
+                            <div class="characters-grid" id="characters-grid">
+                                <!-- Персонажи будут загружаться здесь -->
+                            </div>
+                        </div>
+
+                        <!-- Вкладка: Заметки партии -->
+                        <div id="party-notes" class="tab-content">
+                            <div class="notes-editor">
+                                <h3><i class="fas fa-scroll"></i> Заметки партии</h3>
+                                <textarea id="party-notes-text"
+                                    placeholder="Записывайте здесь важные детали квестов, встреченных NPC, локации и другую информацию..."></textarea>
+                                <button id="save-party-notes" class="primary-btn">
+                                    <i class="fas fa-save"></i> Сохранить заметки
+                                </button>
+                            </div>
+                        </div>
+
+                        <!-- Вкладка: Бэкап -->
+                        <div id="backup" class="tab-content">
+                            <div class="backup-section">
+                                <h3><i class="fas fa-database"></i> Управление данными</h3>
+
+                                <div class="backup-actions">
+                                    <div class="action-card">
+                                        <div class="action-icon">
+                                            <i class="fas fa-download"></i>
+                                        </div>
+                                        <div class="action-info">
+                                            <h4>Экспорт данных</h4>
+                                            <p>Скачайте все данные персонажей в JSON файл</p>
+                                        </div>
+                                        <button id="export-data" class="primary-btn">
+                                            Экспорт
+                                        </button>
+                                    </div>
+
+                                    <div class="action-card">
+                                        <div class="action-icon">
+                                            <i class="fas fa-upload"></i>
+                                        </div>
+                                        <div class="action-info">
+                                            <h4>Импорт данных</h4>
+                                            <p>Загрузите ранее сохраненные данные</p>
+                                        </div>
+                                        <button id="import-data" class="secondary-btn">
+                                            Импорт
+                                        </button>
+                                    </div>
+
+                                    <div class="action-card">
+                                        <div class="action-icon">
+                                            <i class="fas fa-sync"></i>
+                                        </div>
+                                        <div class="action-info">
+                                            <h4>Автобэкап</h4>
+                                            <p>Последний бэкап: <span id="last-backup">никогда</span></p>
+                                        </div>
+                                        <button id="auto-backup" class="secondary-btn">
+                                            Сделать бэкап
+                                        </button>
+                                    </div>
+
+                                    <div class="action-card">
+                                        <div class="action-icon">
+                                            <i class="fas fa-cloud"></i>
+                                        </div>
+                                        <div class="action-info">
+                                            <h4>Синхронизация</h4>
+                                            <p>Сохранено в браузере</p>
+                                        </div>
+                                        <div class="storage-info">
+                                            <span id="storage-usage">0%</span>
+                                        </div>
+                                    </div>
+                                </div>
+
+                                <div class="backup-info">
+                                    <h4>Информация о данных:</h4>
+                                    <div class="info-grid">
+                                        <div class="info-item">
+                                            <span class="info-label">Персонажей:</span>
+                                            <span class="info-value" id="data-count">0</span>
+                                        </div>
+                                        <div class="info-item">
+                                            <span class="info-label">Последнее изменение:</span>
+                                            <span class="info-value" id="last-modified">-</span>
+                                        </div>
+                                        <div class="info-item">
+                                            <span class="info-label">Размер данных:</span>
+                                            <span class="info-value" id="data-size">0 KB</span>
+                                        </div>
+                                        <div class="info-item">
+                                            <span class="info-label">Версия формата:</span>
+                                            <span class="info-value">1.1</span>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Модальное окно редактирования персонажа -->
+            <div id="character-modal" class="modal">
+                <div class="modal-content large-modal">
+                    <!-- Контент будет загружаться динамически -->
+                </div>
+            </div>
+
+            <!-- Скрытый input для импорта -->
+            <input type="file" id="import-file" accept=".json" style="display: none;">
+            <div class="app-container">
+                <!-- Левая панель (управление бросками) -->
+                <div class="left-panel">
+                    <div class="dice-controls">
+                        <h2><i class="fas fa-cube"></i> Быстрые броски</h2>
+                        <div class="dice-buttons">
+                            <button class="dice-btn" data-sides="4" title="Бросить d4">d4</button>
+                            <button class="dice-btn" data-sides="6" title="Бросить d6">d6</button>
+                            <button class="dice-btn" data-sides="8" title="Бросить d8">d8</button>
+                            <button class="dice-btn" data-sides="10" title="Бросить d10">d10</button>
+                            <button class="dice-btn" data-sides="12" title="Бросить d12">d12</button>
+                            <button class="dice-btn" data-sides="20" title="Бросить d20">d20</button>
+                            <button class="dice-btn" data-sides="100" title="Бросить d100">d100</button>
+                        </div>
+
+                        <div class="custom-roll">
+                            <h3><i class="fas fa-sliders-h"></i> Произвольный бросок</h3>
+                            <div class="custom-controls">
+                                <div class="input-group">
+                                    <label for="dice-count">Количество:</label>
+                                    <input type="number" id="dice-count" min="1" max="10" value="1">
+                                </div>
+                                <div class="input-group">
+                                    <label for="dice-sides">Граней:</label>
+                                    <input type="number" id="dice-sides" min="2" max="100" value="6">
+                                </div>
+                                <button id="custom-roll-btn" class="primary-btn">
+                                    <i class="fas fa-play"></i> Бросить
+                                </button>
+                            </div>
+                            <div class="modifier">
+                                <label for="modifier">Модификатор:</label>
+                                <div class="modifier-controls">
+                                    <button class="mod-btn" data-change="-1">-1</button>
+                                    <input type="number" id="modifier" value="0" min="-100" max="100">
+                                    <button class="mod-btn" data-change="1">+1</button>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="quick-actions">
+                            <h3><i class="fas fa-bolt"></i> Специальные броски</h3>
+                            <button id="roll-advantage" class="action-btn advantage">
+                                <i class="fas fa-arrow-up"></i> Преимущество (2d20)
+                            </button>
+                            <button id="roll-disadvantage" class="action-btn disadvantage">
+                                <i class="fas fa-arrow-down"></i> Помеха (2d20)
+                            </button>
+                            <button id="roll-initiative" class="action-btn initiative">
+                                <i class="fas fa-running"></i> Инициатива (d20)
+                            </button>
+                            <button id="clear-local" class="action-btn secondary">
+                                <i class="fas fa-trash-alt"></i> Очистить локальный лог
+                            </button>
+                        </div>
+                    </div>
+
+                    <div class="user-list">
+                        <div class="list-header">
+                            <h2><i class="fas fa-users"></i> Игроки онлайн (<span id="users-count">0</span>)</h2>
+                            <span class="last-update" id="last-update">только что</span>
+                        </div>
+                        <div id="users-container">
+                            <div class="user-placeholder">
+                                <i class="fas fa-spinner fa-spin"></i>
+                                <p>Загрузка списка игроков...</p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Центральная панель (анимация бросков) -->
+                <div class="center-panel">
+                    <div class="dice-display">
+                        <h2><i class="fas fa-play-circle"></i> Анимация броска</h2>
+                        <div id="dice-container">
+                            <div class="dice-placeholder">
+                                <i class="fas fa-dice-d20 fa-3x"></i>
+                                <p>Здесь отображаются броски всех игроков</p>
+                                <small>Нажмите на любой кубик в списке справа, чтобы посмотреть анимацию</small>
+                            </div>
+                        </div>
+                        <div class="current-result">
+                            <div class="result-header">
+                                <h3>Текущий результат</h3>
+                                <span class="result-source" id="current-roller">Ожидание бросков...</span>
+                            </div>
+                            <div class="result-total" id="current-total">0</div>
+                            <div class="result-details" id="result-details">
+                                <p>Детали броска появятся здесь</p>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="quick-chat">
+                        <h2><i class="fas fa-comments"></i> Быстрые реакции</h2>
+                        <div class="chat-buttons">
+                            <button class="chat-btn" data-msg="🎲 Удачи всем!">
+                                <i class="fas fa-dice"></i> Удачи!
+                            </button>
+                            <button class="chat-btn" data-msg="💥 Критический удар!">
+                                <i class="fas fa-bolt"></i> Критический!
+                            </button>
+                            <button class="chat-btn" data-msg="👍 Спасибо!">
+                                <i class="fas fa-thumbs-up"></i> Спасибо!
+                            </button>
+                            <button class="chat-btn" data-msg="🤞 Повезёт в следующий раз">
+                                <i class="fas fa-hand-holding-heart"></i> Повезёт!
+                            </button>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Правая панель (общий лог) -->
+                <div class="right-panel">
+                    <div class="global-log">
+                        <div class="log-header">
+                            <h2><i class="fas fa-globe"></i> Все броски</h2>
+                            <div class="log-controls">
+                                <div class="log-filters">
+                                    <button class="filter-btn active" data-filter="all">Все</button>
+                                    <button class="filter-btn" data-filter="d20">Только d20</button>
+                                    <button class="filter-btn" data-filter="critical">Критические</button>
+                                </div>
+                                <div class="log-actions">
+                                    <button id="refresh-logs" title="Обновить">
+                                        <i class="fas fa-sync-alt"></i>
+                                    </button>
+                                    <button id="export-logs" title="Экспорт">
+                                        <i class="fas fa-download"></i>
+                                    </button>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="log-info">
+                            <span class="log-update">
+                                <i class="fas fa-sync fa-spin"></i> Обновляется в реальном времени
+                            </span>
+                            <span class="log-auto-scroll">
+                                <input type="checkbox" id="auto-scroll" checked>
+                                <label for="auto-scroll">Автопрокрутка</label>
+                            </span>
+                        </div>
+                        <div id="global-log-container">
+                            <div class="log-welcome">
+                                <div class="welcome-icon">
+                                    <i class="fas fa-dice-d20"></i>
+                                </div>
+                                <h3>Добро пожаловать!</h3>
+                                <p>Здесь отображаются броски всех игроков в реальном времени.</p>
+                                <p>Подключитесь к серверу, чтобы начать.</p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </main>
+
+        <footer>
+            <div class="footer-content">
+                <div class="footer-left">
+                    <p>D&D Dice Platform v1.0 | Режим реального времени</p>
+                </div>
+                <div class="footer-center">
+                    <p id="server-url">ws://localhost:3000</p>
+                </div>
+                <div class="footer-right">
+                    <p>Подключено: <span id="connection-id">-</span></p>
+                </div>
+            </div>
+        </footer>
+    </div>
+
+    <!-- Модальное окно для смены имени -->
+    <div id="username-modal" class="modal">
+        <div class="modal-content">
+            <h3><i class="fas fa-user-edit"></i> Изменить имя игрока</h3>
+            <div class="modal-body">
+                <input type="text" id="new-username" placeholder="Введите ваше имя" maxlength="20" autocomplete="off">
+                <div class="username-examples">
+                    <small>Примеры: Гэндальф, Леголас, Дриззт, Волшебник42</small>
+                </div>
+            </div>
+            <div class="modal-buttons">
+                <button id="save-username" class="primary-btn">
+                    <i class="fas fa-save"></i> Сохранить
+                </button>
+                <button id="cancel-username" class="secondary-btn">
+                    <i class="fas fa-times"></i> Отмена
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Уведомления -->
+    <div id="notification-container"></div>
+
+    <!-- Подключение Socket.IO клиента -->
+    <script src="/socket.io/socket.io.js"></script>
+    <script src="script.js"></script>
+    <script src="characters.js"></script>
+</body>
+
+</html>
