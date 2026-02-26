@@ -25,6 +25,26 @@
                     </span>
                 </div>
             </div>
+
+            <!-- НОВЫЙ БЛОК: Кнопки навигации по вкладкам -->
+            <div class="nav-tabs">
+                <button class="nav-tab active" data-tab="spells">
+                    <i class="fas fa-magic"></i> Заклинания
+                </button>
+                <button class="nav-tab" data-tab="talents">
+                    <i class="fas fa-star"></i> Таланты
+                </button>
+                <button class="nav-tab" data-tab="tarot">
+                    <i class="fas fa-crown"></i> Таро
+                </button>
+                <button class="nav-tab" data-tab="characters">
+                    <i class="fas fa-users"></i> Персонажи
+                </button>
+                <button class="nav-tab" data-tab="lore">
+                    <i class="fas fa-book-open"></i> Лор
+                </button>
+            </div>
+
             <div class="user-controls">
                 <div class="user-info">
                     <span class="user-avatar" id="user-avatar">🎲</span>
@@ -40,152 +60,6 @@
         </header>
 
         <main>
-
-            <!-- Кнопка открытия панели персонажей -->
-            <!-- <button id="toggle-characters" class="characters-toggle" title="Персонажи">
-                <i class="fas fa-users"></i> Персонажи
-            </button> -->
-
-            <!-- Боковая панель персонажей -->
-            <div id="characters-panel" class="characters-panel">
-                <!-- Заголовок панели -->
-                <div class="panel-header">
-                    <h2><i class="fas fa-user-friends"></i> Управление персонажами</h2>
-                    <button id="close-characters" class="close-btn">
-                        <i class="fas fa-times"></i>
-                    </button>
-                </div>
-
-                <!-- Вкладки -->
-                <div class="characters-tabs">
-                    <div class="tabs-header">
-                        <button class="tab-btn active" data-tab="characters-list">
-                            <i class="fas fa-list"></i> Все персонажи
-                        </button>
-                        <button class="tab-btn" data-tab="party-notes">
-                            <i class="fas fa-scroll"></i> Заметки партии
-                        </button>
-                        <button class="tab-btn" data-tab="backup">
-                            <i class="fas fa-database"></i> Бэкап
-                        </button>
-                    </div>
-
-                    <!-- Контент вкладок -->
-                    <div class="tabs-content">
-                        <!-- Вкладка: Список персонажей -->
-                        <div id="characters-list" class="tab-content active">
-                            <div class="characters-grid" id="characters-grid">
-                                <!-- Персонажи будут загружаться здесь -->
-                            </div>
-                        </div>
-
-                        <!-- Вкладка: Заметки партии -->
-                        <div id="party-notes" class="tab-content">
-                            <div class="notes-editor">
-                                <h3><i class="fas fa-scroll"></i> Заметки партии</h3>
-                                <textarea id="party-notes-text"
-                                    placeholder="Записывайте здесь важные детали квестов, встреченных NPC, локации и другую информацию..."></textarea>
-                                <button id="save-party-notes" class="primary-btn">
-                                    <i class="fas fa-save"></i> Сохранить заметки
-                                </button>
-                            </div>
-                        </div>
-
-                        <!-- Вкладка: Бэкап -->
-                        <div id="backup" class="tab-content">
-                            <div class="backup-section">
-                                <h3><i class="fas fa-database"></i> Управление данными</h3>
-
-                                <div class="backup-actions">
-                                    <div class="action-card">
-                                        <div class="action-icon">
-                                            <i class="fas fa-download"></i>
-                                        </div>
-                                        <div class="action-info">
-                                            <h4>Экспорт данных</h4>
-                                            <p>Скачайте все данные персонажей в JSON файл</p>
-                                        </div>
-                                        <button id="export-data" class="primary-btn">
-                                            Экспорт
-                                        </button>
-                                    </div>
-
-                                    <div class="action-card">
-                                        <div class="action-icon">
-                                            <i class="fas fa-upload"></i>
-                                        </div>
-                                        <div class="action-info">
-                                            <h4>Импорт данных</h4>
-                                            <p>Загрузите ранее сохраненные данные</p>
-                                        </div>
-                                        <button id="import-data" class="secondary-btn">
-                                            Импорт
-                                        </button>
-                                    </div>
-
-                                    <div class="action-card">
-                                        <div class="action-icon">
-                                            <i class="fas fa-sync"></i>
-                                        </div>
-                                        <div class="action-info">
-                                            <h4>Автобэкап</h4>
-                                            <p>Последний бэкап: <span id="last-backup">никогда</span></p>
-                                        </div>
-                                        <button id="auto-backup" class="secondary-btn">
-                                            Сделать бэкап
-                                        </button>
-                                    </div>
-
-                                    <div class="action-card">
-                                        <div class="action-icon">
-                                            <i class="fas fa-cloud"></i>
-                                        </div>
-                                        <div class="action-info">
-                                            <h4>Синхронизация</h4>
-                                            <p>Сохранено в браузере</p>
-                                        </div>
-                                        <div class="storage-info">
-                                            <span id="storage-usage">0%</span>
-                                        </div>
-                                    </div>
-                                </div>
-
-                                <div class="backup-info">
-                                    <h4>Информация о данных:</h4>
-                                    <div class="info-grid">
-                                        <div class="info-item">
-                                            <span class="info-label">Персонажей:</span>
-                                            <span class="info-value" id="data-count">0</span>
-                                        </div>
-                                        <div class="info-item">
-                                            <span class="info-label">Последнее изменение:</span>
-                                            <span class="info-value" id="last-modified">-</span>
-                                        </div>
-                                        <div class="info-item">
-                                            <span class="info-label">Размер данных:</span>
-                                            <span class="info-value" id="data-size">0 KB</span>
-                                        </div>
-                                        <div class="info-item">
-                                            <span class="info-label">Версия формата:</span>
-                                            <span class="info-value">1.1</span>
-                                        </div>
-                                    </div>
-                                </div>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-            </div>
-
-            <!-- Модальное окно редактирования персонажа -->
-            <div id="character-modal" class="modal">
-                <div class="modal-content large-modal">
-                    <!-- Контент будет загружаться динамически -->
-                </div>
-            </div>
-
-            <!-- Скрытый input для импорта -->
-            <input type="file" id="import-file" accept=".json" style="display: none;">
             <div class="app-container">
                 <!-- Левая панель (управление бросками) -->
                 <div class="left-panel">
@@ -280,21 +154,28 @@
                         </div>
                     </div>
 
-                    <div class="quick-chat">
-                        <h2><i class="fas fa-comments"></i> Быстрые реакции</h2>
-                        <div class="chat-buttons">
-                            <button class="chat-btn" data-msg="🎲 Удачи всем!">
-                                <i class="fas fa-dice"></i> Удачи!
-                            </button>
-                            <button class="chat-btn" data-msg="💥 Критический удар!">
-                                <i class="fas fa-bolt"></i> Критический!
-                            </button>
-                            <button class="chat-btn" data-msg="👍 Спасибо!">
-                                <i class="fas fa-thumbs-up"></i> Спасибо!
-                            </button>
-                            <button class="chat-btn" data-msg="🤞 Повезёт в следующий раз">
-                                <i class="fas fa-hand-holding-heart"></i> Повезёт!
-                            </button>
+                    <!-- ИЗМЕНЕННЫЙ БЛОК: Быстрые реакции -> Персонажи -->
+                    <div class="characters-section">
+                        <h2><i class="fas fa-users"></i> Персонажи</h2>
+                        <div class="characters-container">
+                            <!-- Здесь будет отображаться информация о персонаже -->
+                            <div class="character-selector">
+                                <div class="dropdown">
+                                    <select id="character-select" class="character-dropdown">
+                                        <option value="khunhau">Хунхау (Ящеролюд-Варвар)</option>
+                                        <option value="meksiagnun">Мексиагнун (Бастанец-Маг)</option>
+                                        <option value="gruel">Груэль (Полуэльф-Вор)</option>
+                                        <option value="ulfost">Ульфост (Ульфен-Воин)</option>
+                                    </select>
+                                </div>
+                                <div class="character-data" id="character-data">
+                                    <!-- Данные будут загружаться через JavaScript -->
+                                    <div class="character-placeholder">
+                                        <i class="fas fa-dragon"></i>
+                                        <p>Выберите персонажа для просмотра характеристик</p>
+                                    </div>
+                                </div>
+                            </div>
                         </div>
                     </div>
                 </div>
@@ -347,7 +228,7 @@
         <footer>
             <div class="footer-content">
                 <div class="footer-left">
-                    <p>D&D Dice Platform v1.0 | Режим реального времени</p>
+                    <p>D&D Dice Platform v1.0 | Нахуй читаешь, пшёл нах отсюда иди кубы бросай.</p>
                 </div>
                 <div class="footer-center">
                     <p id="server-url">ws://localhost:3000</p>
@@ -366,7 +247,6 @@
             <div class="modal-body">
                 <input type="text" id="new-username" placeholder="Введите ваше имя" maxlength="20" autocomplete="off">
                 <div class="username-examples">
-                    <small>Примеры: Гэндальф, Леголас, Дриззт, Волшебник42</small>
                 </div>
             </div>
             <div class="modal-buttons">
@@ -386,7 +266,10 @@
     <!-- Подключение Socket.IO клиента -->
     <script src="/socket.io/socket.io.js"></script>
     <script src="script.js"></script>
+    <!-- Подключаем новый JS файл с данными персонажей -->
     <script src="characters.js"></script>
+    <!-- Подключаем JS для управления вкладками -->
+    <script src="navigation.js"></script>
 </body>
 
 </html>

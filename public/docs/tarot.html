@@ -1,0 +1,660 @@
+<!DOCTYPE html>
+<html lang="ru">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>D&D Таро · Эффекты с переворотом</title>
+    <style>
+        * {
+            box-sizing: border-box;
+            font-family: 'Segoe UI', Roboto, system-ui, sans-serif;
+        }
+
+        body {
+            background: #1a1e2c;
+            color: #e4e6eb;
+            margin: 0;
+            padding: 20px;
+            min-height: 100vh;
+            display: flex;
+            flex-direction: column;
+        }
+
+        h1 {
+            text-align: center;
+            font-size: 2.5rem;
+            margin: 0 0 10px;
+            letter-spacing: 2px;
+            text-shadow: 0 0 5px #b87c4b;
+        }
+
+        .sub {
+            text-align: center;
+            margin-bottom: 30px;
+            font-style: italic;
+            color: #aaa;
+        }
+
+        .controls {
+            display: flex;
+            flex-wrap: wrap;
+            justify-content: center;
+            gap: 15px;
+            margin-bottom: 20px;
+        }
+
+        .search-box {
+            display: flex;
+            gap: 5px;
+            background: #2d3349;
+            border-radius: 40px;
+            padding: 5px 15px;
+            align-items: center;
+            border: 1px solid #4e546c;
+        }
+
+        .search-box input {
+            background: transparent;
+            border: none;
+            padding: 10px 5px;
+            font-size: 1rem;
+            color: white;
+            width: 250px;
+            outline: none;
+        }
+
+        .search-box button {
+            background: none;
+            border: none;
+            cursor: pointer;
+            font-size: 1.2rem;
+        }
+
+        .btn-random {
+            background: #3c3f5e;
+            border: 2px solid #b87c4b;
+            color: white;
+            padding: 10px 25px;
+            border-radius: 40px;
+            font-size: 1.1rem;
+            font-weight: bold;
+            cursor: pointer;
+            transition: 0.2s;
+            box-shadow: 0 4px 0 #1e212e;
+        }
+
+        .btn-random:hover {
+            background: #4f5377;
+            transform: translateY(-2px);
+            box-shadow: 0 6px 0 #1e212e;
+        }
+
+        .btn-random:active {
+            transform: translateY(2px);
+            box-shadow: 0 2px 0 #1e212e;
+        }
+
+        /* Панель вытянутых карт — вверху */
+        .drawn-panel {
+            background: #222638;
+            border-radius: 20px;
+            padding: 20px;
+            margin-bottom: 30px;
+            border: 2px solid #b87c4b;
+        }
+
+        .drawn-title {
+            font-size: 1.3rem;
+            margin-bottom: 15px;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .drawn-cards {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 20px;
+            justify-content: center;
+        }
+
+        .drawn-card {
+            background: #2f354a;
+            border-radius: 16px;
+            padding: 10px;
+            width: 150px;
+            text-align: center;
+            cursor: pointer;
+            border: 1px solid #5f6b8f;
+            transition: 0.2s;
+        }
+
+        .drawn-card:hover {
+            border-color: #b87c4b;
+            background: #3d445e;
+        }
+
+        .drawn-card img {
+            width: 100%;
+            border-radius: 8px;
+            transition: transform 0.2s;
+        }
+
+        .drawn-card.reversed img {
+            transform: rotate(180deg);
+        }
+
+        .clear-drawn {
+            background: none;
+            border: 1px solid #7f4b8b;
+            color: white;
+            padding: 6px 15px;
+            border-radius: 20px;
+            cursor: pointer;
+            margin-left: 15px;
+        }
+
+        .clear-drawn:hover {
+            background: #4a3b5e;
+        }
+
+        .cards-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(140px, 1fr));
+            gap: 20px;
+            margin: 20px 0 40px;
+            justify-content: center;
+        }
+
+        .card-item {
+            background: #2b2f42;
+            border-radius: 12px;
+            padding: 12px 8px 8px;
+            text-align: center;
+            box-shadow: 0 8px 0 #161a28;
+            transition: 0.1s ease;
+            cursor: pointer;
+            border: 1px solid #4e546c;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+        }
+
+        .card-item:hover {
+            transform: scale(1.02);
+            background: #353b54;
+            border-color: #b87c4b;
+        }
+
+        .card-image {
+            width: 100%;
+            max-width: 120px;
+            height: auto;
+            border-radius: 8px;
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.6);
+            background: #1e212e;
+            margin-bottom: 8px;
+        }
+
+        .card-name {
+            font-weight: 600;
+            font-size: 0.9rem;
+            margin: 5px 0 2px;
+            color: #f0d5b0;
+        }
+
+        .card-suit {
+            font-size: 0.75rem;
+            color: #a9b2d1;
+            text-transform: uppercase;
+        }
+
+        .modal {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0, 0, 0, 0.85);
+            align-items: center;
+            justify-content: center;
+            z-index: 1000;
+        }
+
+        .modal-content {
+            background: #2b2f42;
+            max-width: 600px;
+            width: 90%;
+            border-radius: 32px;
+            padding: 25px;
+            border: 2px solid #b87c4b;
+            box-shadow: 0 20px 30px black;
+            color: #eceef5;
+            position: relative;
+        }
+
+        .close {
+            position: absolute;
+            right: 20px;
+            top: 15px;
+            font-size: 2rem;
+            cursor: pointer;
+            color: #b87c4b;
+        }
+
+        .modal-header {
+            display: flex;
+            gap: 20px;
+            margin-bottom: 20px;
+        }
+
+        .modal-header img {
+            width: 100px;
+            border-radius: 12px;
+            background: #1e212e;
+        }
+
+        .modal-title h2 {
+            margin: 0 0 5px;
+            color: #f0d5b0;
+        }
+
+        .drawn-badge {
+            display: inline-block;
+            background: #b87c4b;
+            color: #1a1e2c;
+            font-weight: bold;
+            padding: 4px 12px;
+            border-radius: 20px;
+            margin-bottom: 10px;
+        }
+
+        .effect-block {
+            background: #1f2336;
+            padding: 15px;
+            border-radius: 20px;
+            margin: 15px 0;
+            border-left: 6px solid #b87c4b;
+        }
+
+        .effect-block.reversed {
+            border-left-color: #7f4b8b;
+        }
+
+        .effect-block.highlight {
+            box-shadow: 0 0 0 2px #f5c542, 0 0 15px gold;
+        }
+
+        .effect-title {
+            font-weight: bold;
+            font-size: 1.2rem;
+            margin-bottom: 8px;
+        }
+
+        hr {
+            border: 1px solid #4e546c;
+            margin: 15px 0;
+        }
+
+        footer {
+            text-align: center;
+            color: #6a6f8a;
+            margin-top: 15px;
+        }
+    </style>
+</head>
+
+<body>
+    <h1>🃏 D&D ТАРО · ПЕРЕВЁРНУТЫЕ КАРТЫ</h1>
+    <div class="sub">Кликни по карте, чтобы увидеть прямой и перевёрнутый эффект</div>
+
+    <div class="controls">
+        <div class="search-box">
+            <input type="text" id="searchInput" placeholder="Поиск карты... (например, Шут, Кубки)">
+            <button id="searchBtn">🔍</button>
+        </div>
+        <button class="btn-random" id="draw1">🎲 1 случайная карта</button>
+        <button class="btn-random" id="draw3">🎲 3 случайные карты</button>
+    </div>
+
+    <!-- Панель вытянутых карт (сверху) -->
+    <div class="drawn-panel" id="drawnPanel">
+        <div class="drawn-title">
+            <span>✨ Вытянутые карты ✨</span>
+            <button class="clear-drawn" id="clearDrawnBtn">Очистить</button>
+        </div>
+        <div id="drawnCardsList" class="drawn-cards"></div>
+    </div>
+
+    <!-- Сетка всех карт -->
+    <div id="cardsContainer" class="cards-grid"></div>
+
+    <!-- Модальное окно -->
+    <div id="modal" class="modal">
+        <div class="modal-content">
+            <span class="close" id="closeModal">&times;</span>
+            <div id="modalBody"></div>
+        </div>
+    </div>
+
+
+    <script>
+        (function () {
+            // ----- ДАННЫЕ ЭФФЕКТОВ (по таблице) -----
+            // Старшие арканы (ключ — номер от 0 до 21, но есть пропуски в описании)
+            const majorArcanaEffects = {
+                0: {
+                    upright: "Дар опрометчивой удачи: один раз за эффект каждый член партии может перебросить проваленный спасбросок или бросок атаки, но обязан принять новый результат.",
+                    reversed: "Невежество: Помеха на все проверки."
+                },
+                1: {
+                    upright: "Воля и реализация: один раз за эффект заклинатель может прочитать заклинание 1-го уровня, не тратя ячейку. Не-заклинатели получают +4 к одной проверке умения.",
+                    reversed: "Обман и неверный путь: следующее заклинание, нацеленное на партию (или первое, что они сотворят), имеет 50% шанс поразить не ту цель."
+                },
+                2: {
+                    upright: "Тайное знание: Преимущество на проверки против иллюзий и обмана (Интеллект).",
+                    reversed: "Скрытые мотивы: Помеха на проверки Интеллекта из-за нервозности."
+                },
+                3: {
+                    upright: "Плодородие и рост: Кости хитов при лечении восстанавливаются с удвоенным результатом.",
+                    reversed: "Зависимость: Скорость уменьшена на 5 футов. В первый ход в боях — пропуск хода."
+                },
+                4: {
+                    upright: "Структура и контроль: +2 к КД от атак существ с меньшей живучестью, чем у игрока.",
+                    reversed: "Тирания: Партия не может использовать тактические отступления."
+                },
+                5: {
+                    upright: "Традиция и договор: Преимущество на проверки при взаимодействии с религиозными организациями и органами власти.",
+                    reversed: "Догма: Помеха на проверки при взаимодействии с нонконформистами, изгоями, еретиками."
+                },
+                6: {
+                    upright: "Гармония: Один раз за раунд, когда два члена партии атакуют одну цель, они могут добавить +1d6 к урону одной из атак.",
+                    reversed: "Дисгармония: Пока назначенные 'партнеры' в пределах 30 футов друг от друга, у них помеха на концентрацию."
+                },
+                7: {
+                    upright: "Воля и победа: Дополнительное действие.",
+                    reversed: "Крушение: Нет возможности двигаться и атаковать цели, остальные действия допускаются."
+                },
+                8: {
+                    upright: "Внутренняя сила: Действием можно крикнуть, дав +5 к следующей проверке Силы или Телосложения себе или союзнику.",
+                    reversed: "Слабость: Помеха на все проверки Силы."
+                },
+                9: {
+                    upright: "Созерцание: Во время короткого отдыха один член партии может получить ответ 'да/нет' на один личный вопрос.",
+                    reversed: "Изоляция: Персонажи не могут получать преимущество от помощи других игроков."
+                },
+                10: {
+                    upright: "Удача: Один раз за эффект, когда у члена партии выпадает натуральная 1, он может немедленно перебросить кубик.",
+                    reversed: "Неудача: Один раз за эффект, когда у члена партии выпадает натуральная 20, перебросить кубик."
+                },
+                11: {
+                    upright: "Справедливость: Вас не возможно обмануть, провести кинуть на деньги. Враги не могут наносить вам смертельные раны",
+                    reversed: "Несправедливость: Помеха на проверки в социальных интеракциях. После боев с врагами вы теряете часть денег"
+                },
+                12: {
+                    upright: "Жертва: Один раз за эффект, когда союзник получает урон от атаки или эффекта, вы можете реакцией принять этот урон на себя. При этом вы получаете сопротивление к этому урону.",
+                    reversed: "Эгоизм: Враги всегда имеют против вас преимущество."
+                },
+                13: {
+                    upright: "Трансформация: Один раз за эффект, когда член партии падает до 0 хитов (но не мгновенно), он остаётся с 1 хитом вместо этого.",
+                    reversed: "Дыхание смерти: Восстановление хитов из любых источников уменьшено наполовину. Пул ХП уменьшается наполовину."
+                },
+                14: {
+                    upright: "Алхимия: Один раз за эффект, когда вы получаете хиты от заклинания или зелья, вы можете разделить их с союзником: каждый получает половину.",
+                    reversed: "Дисбаланс: Любое получаемое вами лечение уменьшено вдвое."
+                },
+                15: {
+                    upright: "Соблазн власти: +2 к броскам to hit. При каждом нанесении урона наносящий получает 1d8 некротического урона.",
+                    reversed: "Порабощение: Заклинания и эффекты контроля (очарование, страх) действуют на партию с преимуществом у накладывающего."
+                },
+                16: {
+                    upright: "Прорыв: Один раз за эффект партия может проигнорировать сопротивление или иммунитет к урону у одной цели на одну атаку/заклинание.",
+                    reversed: "Катастрофа: Первая натуральная 1 в бою приводит к масштабному осложнению (поломка оружия, удар по союзнику и т.д.)."
+                },
+                17: {
+                    upright: "Надежда: Один раз за эффект, когда вы проваливаете спасбросок от страха или иллюзии, вы можете перебросить его с преимуществом. Если здоровье опускается до нуля при атаке противника реакцией вы восстанавливаете 2к8+ЖИВ хитов.",
+                    reversed: "Отчаяние: Вы имеете помеху на спасброски от страха и иллюзий."
+                },
+                18: {
+                    upright: "Интуиция: Преимущество на проверки Восприятия ночью и против существ, использующих иллюзии.",
+                    reversed: "Обман: Ночью перманентная слепота, днём все атаки to hit становятся -5."
+                },
+                19: {
+                    upright: "Просветление: Невосприимчивость к состоянию Испуг. Днём все атаки получают дополнительные 1d8 урона, на попадание прибавляется +5.",
+                    reversed: "Выгорание: Помеха на атаки, враги будут фокусироваться на игроке с этой картой."
+                },
+                20: {
+                    upright: "Просветление. Вы навсегда получаете одно очко талантов (выберите один талант, которому вы соответствуете)",
+                    reversed: "Проклятие невежества. Вы навсегда теряете возможность когда-либо получить один конкретный талант (на рандом) или, если у вас уже есть таланты, один из них стирается (забывается). В качестве альтернативы: ваша одна характеристика уменьшается на 4."
+                },
+                21: {
+                    upright: "Гармония: Все члены партии получают +5 ко всем проверкам характеристик.",
+                    reversed: "Застой: Партия не может получать преимущество, в целом."
+                }
+            };
+
+            // Заглушки для отсутствующих старших арканов (можно заменить позже)
+            // const missingMajor = [11, 12, 14, 17, 20];
+            // missingMajor.forEach(num => {
+            //     majorArcanaEffects[num] = {
+            //         upright: "Эффект прямой карты ещё не записан в древних свитках.",
+            //         reversed: "Перевёрнутый эффект пока неизвестен."
+            //     };
+            // });
+
+            // Функция для младших арканов (без изменений, использует англ. масть)
+            function getMinorEffect(suit, rankNum, isUpright) {
+                const group = rankNum === 1 ? 'ace' : (rankNum <= 6 ? 'low' : (rankNum <= 10 ? 'mid' : 'court'));
+                const sign = isUpright ? 1 : -1;
+                const prefix = isUpright ? 'Прямая: ' : 'Перевёрнутая: ';
+                switch (suit) {
+                    case 'Cups':
+                        if (group === 'ace') return prefix + (isUpright ? '+1d8 к лечению, +2 к проверкам Харизмы' : '-1d8 к лечению, -2 к проверкам Харизмы');
+                        if (group === 'low') return prefix + (isUpright ? '+2d8 к лечению, +3 к проверкам Харизмы' : '-2d8 к лечению, -3 к проверкам Харизмы');
+                        if (group === 'mid') return prefix + (isUpright ? '+3d8 к лечению, +4 к проверкам Харизмы' : '-3d8 к лечению, -4 к проверкам Харизмы');
+                        return prefix + (isUpright ? 'Воскрешение союзника, +5 к проверкам Харизмы' : '-5d8 к лечению, -5 к проверкам Харизмы');
+                    case 'Pentacles':
+                        let bonusAC = '', special = '';
+                        if (group === 'ace') {
+                            bonusAC = isUpright ? '+2 КД' : '-2 КД';
+                            special = isUpright ? 'Выше вероятность найти ценный лут.' : 'Ниже вероятность найти ценный лут.';
+                        } else if (group === 'low') {
+                            bonusAC = isUpright ? '+3 КД' : '-3 КД';
+                            special = isUpright ? 'Цены в магазинах ниже.' : 'Вас буквально грабят без угроз.';
+                        } else if (group === 'mid') {
+                            bonusAC = isUpright ? '+4 КД' : '-4 КД';
+                            special = isUpright ? 'Найдете ценный артефакт.' : 'Будете прокляты.';
+                        } else {
+                            bonusAC = isUpright ? '+5 КД' : '-5 КД';
+                            special = isUpright ? 'Богатство.' : 'Разорение.';
+                        }
+                        return prefix + `${bonusAC}. ${special}`;
+                    case 'Swords':
+                        if (group === 'ace') return prefix + (isUpright ? '+1d8 к урону, +2 к проверкам Силы' : '-1d8 к урону, -2 к проверкам Силы');
+                        if (group === 'low') return prefix + (isUpright ? '+2d8 к урону, +3 к проверкам Силы' : '-2d8 к урону, -3 к проверкам Силы');
+                        if (group === 'mid') return prefix + (isUpright ? '+3d8 к урону, +4 к проверкам Силы' : '-3d8 к урону, -4 к проверкам Силы');
+                        return prefix + (isUpright ? '+4d8 к урону, +5 к проверкам Силы' : '-4d8 к урону, -5 к проверкам Силы');
+                    case 'Wands':
+                        if (group === 'ace') return prefix + (isUpright ? '+8 к магическому урону, преимущество (один раз)' : '-8 к магическому урону, помеха (один раз)');
+                        if (group === 'low') return prefix + (isUpright ? '+16 к магическому урону, преимущество (бой)' : '-16 к магическому урону, помеха (бой)');
+                        if (group === 'mid') return prefix + (isUpright ? '+24 к магическому урону, игнор сопротивления, преимущество (до отдыха)' : '-24 к магическому урону, уязвимость, помеха');
+                        return prefix + (isUpright ? '+36 к магическому урону, игнор сопротивления, преимущество' : '-36 к магическому урону, уязвимость, помеха');
+                    default: return prefix + 'Неизвестный эффект.';
+                }
+            }
+
+            // ----- ПОСТРОЕНИЕ КОЛОДЫ С РУССКИМИ НАЗВАНИЯМИ -----
+            const cards = [];
+
+            // Старшие арканы: русские названия (порядок как в файлах)
+            const majorNamesRu = [
+                "Шут", "Маг", "Верховная Жрица", "Императрица", "Император",
+                "Иерофант", "Влюблённые", "Колесница", "Сила", "Отшельник",
+                "Колесо Фортуны", "Справедливость", "Повешенный", "Смерть", "Умеренность",
+                "Дьявол", "Башня", "Звезда", "Луна", "Солнце",
+                "Суд", "Мир"
+            ];
+            const exactMajorFiles = [
+                "00-TheFool.png", "01-TheMagician.png", "02-TheHighPriestess.png", "03-TheEmpress.png",
+                "04-TheEmperor.png", "05-TheHierophant.png", "06-TheLovers.png", "07-TheChariot.png",
+                "08-Strength.png", "09-TheHermit.png", "10-WheelOfFortune.png", "11-Justice.png",
+                "12-TheHangedMan.png", "13-Death.png", "14-Temperance.png", "15-TheDevil.png",
+                "16-TheTower.png", "17-TheStar.png", "18-TheMoon.png", "19-TheSun.png",
+                "20-Judgement.png", "21-TheWorld.png"
+            ];
+            for (let i = 0; i <= 21; i++) {
+                cards.push({
+                    id: `major-${i}`,
+                    name: majorNamesRu[i],                // русское название
+                    suit: 'Старший Аркан',                 // масть для отображения (рус.)
+                    suitEn: 'Major',                        // для внутренних нужд (не используется в эффектах)
+                    type: 'major',
+                    rank: i,
+                    filename: exactMajorFiles[i],
+                    effectUpright: majorArcanaEffects[i]?.upright || '',
+                    effectReversed: majorArcanaEffects[i]?.reversed || ''
+                });
+            }
+
+            // Младшие арканы: перевод мастей и рангов
+            const suitsEn = ['Cups', 'Pentacles', 'Swords', 'Wands'];
+            const suitsRu = ['Кубки', 'Пентакли', 'Мечи', 'Жезлы'];
+            const rankTitlesRu = ['Туз', 'Двойка', 'Тройка', 'Четвёрка', 'Пятёрка', 'Шестёрка', 'Семёрка', 'Восьмёрка', 'Девятка', 'Десятка', 'Паж', 'Рыцарь', 'Королева', 'Король'];
+            suitsEn.forEach((suitEn, idx) => {
+                const suitRu = suitsRu[idx];
+                for (let r = 1; r <= 14; r++) {
+                    const filename = `${suitEn}${r.toString().padStart(2, '0')}.png`;
+                    const cardName = `${rankTitlesRu[r - 1]} ${suitRu}`;  // например "Туз Кубков"
+                    cards.push({
+                        id: `${suitEn}-${r}`,
+                        name: cardName,
+                        suit: suitRu,                        // масть для отображения (рус.)
+                        suitEn: suitEn,                       // английская масть для генерации эффекта
+                        type: 'minor',
+                        rank: r,
+                        filename: filename,
+                        // Для эффекта передаём английскую масть и номер
+                        effectUpright: getMinorEffect(suitEn, r, true),
+                        effectReversed: getMinorEffect(suitEn, r, false)
+                    });
+                }
+            });
+
+            // ----- ЭЛЕМЕНТЫ -----
+            const container = document.getElementById('cardsContainer');
+            const drawnList = document.getElementById('drawnCardsList');
+            const modal = document.getElementById('modal');
+            const modalBody = document.getElementById('modalBody');
+            const closeModal = document.getElementById('closeModal');
+            const searchInput = document.getElementById('searchInput');
+            const searchBtn = document.getElementById('searchBtn');
+            const clearDrawnBtn = document.getElementById('clearDrawnBtn');
+
+            let drawnCards = []; // { card, isReversed }
+
+            // ----- ОТОБРАЖЕНИЕ СЕТКИ (с фильтром по русским названиям и мастям) -----
+            function renderGrid(filter = '') {
+                container.innerHTML = '';
+                const filtered = cards.filter(c =>
+                    c.name.toLowerCase().includes(filter.toLowerCase()) ||
+                    c.suit.toLowerCase().includes(filter.toLowerCase())
+                );
+                filtered.forEach(card => {
+                    const div = document.createElement('div');
+                    div.className = 'card-item';
+                    div.setAttribute('data-id', card.id);
+                    div.innerHTML = `
+                        <img src="Cards-png/${card.filename}" alt="${card.name}" class="card-image" loading="lazy">
+                        <div class="card-name">${card.name}</div>
+                    `;
+                    div.addEventListener('click', () => openModal(card));
+                    container.appendChild(div);
+                });
+            }
+
+            // ----- МОДАЛКА -----
+            function openModal(card, highlightReversed = null) {
+                const badge = (highlightReversed !== null)
+                    ? `<div class="drawn-badge">🎲 Вытянута: ${highlightReversed ? 'ПЕРЕВЁРНУТАЯ' : 'ПРЯМАЯ'}</div>`
+                    : '';
+                modalBody.innerHTML = `
+                    ${badge}
+                    <div class="modal-header">
+                        <img src="Cards-png/${card.filename}" alt="${card.name}">
+                        <div class="modal-title">
+                            <h2>${card.name}</h2>
+                            <p>${card.suit}</p>
+                        </div>
+                    </div>
+                    <div class="effect-block ${highlightReversed === false ? 'highlight' : ''}">
+                        <div class="effect-title">⬆ Прямое положение</div>
+                        <p>${card.effectUpright}</p>
+                    </div>
+                    <div class="effect-block reversed ${highlightReversed === true ? 'highlight' : ''}">
+                        <div class="effect-title">⬇ Перевёрнутое положение</div>
+                        <p>${card.effectReversed}</p>
+                    </div>
+                `;
+                modal.style.display = 'flex';
+            }
+
+            // ----- ПАНЕЛЬ ВЫТЯНУТЫХ -----
+            function displayDrawn(selectedCardsWithOrientation) {
+                drawnCards = selectedCardsWithOrientation;
+                drawnList.innerHTML = '';
+                drawnCards.forEach(item => {
+                    const card = item.card;
+                    const isReversed = item.isReversed;
+                    const div = document.createElement('div');
+                    div.className = `drawn-card ${isReversed ? 'reversed' : ''}`;
+                    div.innerHTML = `
+                        <img src="Cards-png/${card.filename}" alt="${card.name}">
+                        <div>${card.name}</div>
+                    `;
+                    div.addEventListener('click', () => openModal(card, isReversed));
+                    drawnList.appendChild(div);
+                });
+            }
+
+            // ----- СЛУЧАЙНЫЙ ВЫБОР -----
+            function drawRandom(count) {
+                if (count > cards.length) count = cards.length;
+                const shuffled = [...cards].sort(() => Math.random() - 0.5);
+                const selected = shuffled.slice(0, count);
+                const withOrientation = selected.map(card => ({
+                    card,
+                    isReversed: Math.random() < 0.5
+                }));
+                displayDrawn(withOrientation);
+            }
+
+            // ----- ОЧИСТКА -----
+            clearDrawnBtn.addEventListener('click', () => {
+                drawnCards = [];
+                drawnList.innerHTML = '';
+            });
+
+            // ----- ПОИСК -----
+            function filterCards() {
+                renderGrid(searchInput.value);
+            }
+            searchBtn.addEventListener('click', filterCards);
+            searchInput.addEventListener('keyup', (e) => { if (e.key === 'Enter') filterCards(); });
+
+            // ----- КНОПКИ -----
+            document.getElementById('draw1').addEventListener('click', () => drawRandom(1));
+            document.getElementById('draw3').addEventListener('click', () => drawRandom(3));
+
+            // ----- ЗАКРЫТИЕ МОДАЛКИ -----
+            closeModal.onclick = () => modal.style.display = 'none';
+            window.onclick = (e) => { if (e.target === modal) modal.style.display = 'none'; };
+
+            // СТАРТ
+            renderGrid();
+        })();
+    </script>
+</body>
+
+</html>
