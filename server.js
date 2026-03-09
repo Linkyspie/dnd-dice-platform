@@ -4,7 +4,106 @@ const socketIo = require('socket.io');
 const cors = require('cors');
 const { v4: uuidv4 } = require('uuid');
 const path = require('path');
+const axios = require('axios'); // если ещё не установлен: npm install axios
+const csv = require('csv-parse/sync'); // npm install csv-parse
 
+// Переменная для хранения данных персонажей
+let charactersCache = {
+  lastUpdated: null,
+  data: {},           // здесь будет наш объект, аналогичный charactersData из characters.js
+  source: 'initial'
+};
+
+// Функция загрузки и парсинга CSV
+async function fetchCharactersFromSheet() {
+  const CSV_URL = 'https://docs.google.com/spreadsheets/d/e/2PACX-1vTm600hugg4y6xlWvjXtBukplWtMEjc4pLd-SxvOpxpf65Z9p8yIE_nuN2wVPfUHM2mBc7qCwHOsnhP/pub?gid=1205392291&single=true&output=csv'; // ваша ссылка
+
+  try {
+    console.log('🔄 Загружаю CSV из Google Sheets...');
+    const response = await axios.get(CSV_URL, { responseType: 'text' });
+    console.log('✅ CSV загружен, размер:', response.data.length, 'символов');
+
+    const csvData = response.data;
+    const records = csv.parse(csvData, {
+      columns: true,
+      skip_empty_lines: true,
+      trim: true
+    });
+
+    console.log(`📊 Парсинг завершён. Найдено строк (без заголовка): ${records.length}`);
+
+    if (records.length === 0) {
+      console.warn('⚠️ В CSV нет данных (кроме заголовков)');
+    } else {
+      console.log('Пример первой записи (первые 3 ключа):', Object.keys(records[0]).slice(0, 3));
+      console.log('Значения первой записи:', records[0]);
+    }
+
+    // Преобразуем записи в нужный формат
+    const characters = {};
+    records.forEach((row, index) => {
+      if (!row['Имя']) {
+        console.log(`Строка ${index + 2} пропущена: нет поля "Имя"`);
+        return;
+      }
+
+      const id = row['ID'].toLowerCase().replace(/[^a-zа-яё]/gi, ''); // упрощённо, можно сделать по-другому
+
+      characters[id] = {
+        id: id,
+        name: row['Имя'] || '',
+        race: row['Раса'] || '',
+        class: row['Класс'] || '',
+        level: parseInt(row['Уровень']) || 1,
+        stats: {
+          strength: parseInt(row['Сила']) || 10,
+          durability: parseInt(row['Живучесть']) || 10,
+          agility: parseInt(row['Ловкость']) || 10,
+          intelligence: parseInt(row['Интеллект']) || 10
+        },
+        modifiers: {
+          strength: parseInt(row['Сила мод']) || 0,  // второй столбец Сила (модификатор)
+          durability: parseInt(row['Живучесть мод']) || 0,
+          agility: parseInt(row['Ловкость мод']) || 0,
+          intelligence: parseInt(row['Интеллект мод']) || 0
+        },
+        hp: parseInt(row['ХП']) || 0,
+        armorClass: parseInt(row['Класс брони']) || 10,
+        physicalDamage: parseInt(row['Физ. урон']) || 0,
+        magicDamage: parseInt(row['Маг. урон']) || 0,
+        toHit: parseInt(row['To hit']) || 0,
+        spellSlots: parseInt(row['Ячейки заклинаний']) || 0,
+        gold: parseInt(row['ЗОЛОТО']) || 0,
+        totalPoints: parseInt(row['Сумма очков']) || 0,
+        growth: row['Прирост очков'] || ''
+      };
+    });
+
+    console.log(`✅ Создано объектов персонажей: ${Object.keys(characters).length}`);
+
+    charactersCache = {
+      lastUpdated: new Date().toISOString(),
+      data: characters,
+      source: 'google_sheets'
+    };
+
+    console.log('✅ Данные персонажей обновлены в кэше');
+  } catch (error) {
+    console.error('❌ Ошибка загрузки или парсинга CSV:', error);
+    // В случае ошибки оставляем старые данные (если они есть)
+    if (Object.keys(charactersCache.data).length === 0) {
+      // Если данных ещё нет, можно использовать резервные (хардкод из characters.js)
+      console.log('⚠️ Использую резервные данные персонажей (из characters.js)');
+      charactersCache.data = require('./path-to-backup/characters-backup.json'); // или встроить объект напрямую
+    }
+  }
+}
+
+// При старте сервера загружаем данные
+fetchCharactersFromSheet();
+
+// Периодическое обновление (каждые 10 минут)
+setInterval(fetchCharactersFromSheet, 10 * 60 * 1000);
 const app = express();
 const server = http.createServer(app);
 const io = socketIo(server, {
@@ -26,144 +125,144 @@ io.engine.pingInterval = 25000;
 app.use(express.json({ limit: '1mb' }));
 app.use(express.urlencoded({ extended: true, limit: '1mb' }));
 // Добавьте в начало server.js после других импортов
-const charactersData = [
-  // Ваши данные персонажей
-  {
-    id: 1,
-    name: 'Кхааса',
-    race: 'Ящеролюд',
-    class: 'Варвар',
-    level: 1,
-    experience: 0,
-    stats: {
-      strength: 17,
-      durability: 12,
-      agility: 5,
-      intellect: 5
-    },
-    modifiers: {
-      armorClass: 0,
-      toHit: 0,
-      spellSlots: 0
-    },
-    gold: 0,
-    weapons: [
-      { name: 'Большой топор', damage: '1d12+3', type: 'Рубящее' }
-    ],
-    equipment: [
-      { name: 'Кожаный доспех', type: 'Броня' }
-    ],
-    inventory: [
-      { name: 'Веревка', quantity: 1 },
-      { name: 'Факелы', quantity: 5 }
-    ],
-    spells: [],
-    quests: ['Найти древний артефакт'],
-    notes: 'Сильный и выносливый воин',
-    lastUpdated: new Date().toISOString()
-  },
-  {
-    id: 2,
-    name: 'Мексиагнун',
-    race: 'Полуэльф',
-    class: 'Маг/Таролог',
-    level: 1,
-    experience: 0,
-    stats: {
-      strength: 5,
-      durability: 9,
-      agility: 8,
-      intellect: 17
-    },
-    modifiers: {
-      armorClass: 0,
-      toHit: 0,
-      spellSlots: 0
-    },
-    gold: 0,
-    weapons: [
-      { name: 'Посох', damage: '1d6', type: 'Дробящее' }
-    ],
-    equipment: [
-      { name: 'Роба мага', type: 'Одежда' }
-    ],
-    inventory: [
-      { name: 'Книга заклинаний', quantity: 1 }
-    ],
-    spells: [
-      { name: 'Предвидение', level: 1, slots: 1 }
-    ],
-    quests: ['Изучить древние пророчества'],
-    notes: 'Мудрый маг, специализирующийся на предсказаниях',
-    lastUpdated: new Date().toISOString()
-  },
-  {
-    id: 3,
-    name: 'Груэль',
-    race: 'Бастанец',
-    class: 'Вор-шептун',
-    level: 1,
-    experience: 0,
-    stats: {
-      strength: 7,
-      durability: 9,
-      agility: 17,
-      intellect: 6
-    },
-    modifiers: {
-      armorClass: 0,
-      toHit: 0,
-      spellSlots: 0
-    },
-    gold: 0,
-    weapons: [
-      { name: 'Короткий меч', damage: '1d6+3', type: 'Колющее' }
-    ],
-    equipment: [
-      { name: 'Кожанка', type: 'Броня' }
-    ],
-    inventory: [
-      { name: 'Отмычки', quantity: 1 }
-    ],
-    spells: [],
-    quests: ['Узнать секреты гильдии воров'],
-    notes: 'Тихий и незаметный вор',
-    lastUpdated: new Date().toISOString()
-  },
-  {
-    id: 4,
-    name: 'Ульфост',
-    race: 'Кхааса/Ульфен',
-    class: 'Воин',
-    level: 1,
-    experience: 0,
-    stats: {
-      strength: 16,
-      durability: 12,
-      agility: 7,
-      intellect: 4
-    },
-    modifiers: {
-      armorClass: 0,
-      toHit: 0,
-      spellSlots: 0
-    },
-    gold: 0,
-    weapons: [
-      { name: 'Длинный меч', damage: '1d8+3', type: 'Рубящее' }
-    ],
-    equipment: [
-      { name: 'Кольчуга', type: 'Броня' }
-    ],
-    inventory: [
-      { name: 'Аптечка', quantity: 1 }
-    ],
-    spells: [],
-    quests: ['Защищать границы королевства'],
-    notes: 'Дисциплинированный воин',
-    lastUpdated: new Date().toISOString()
-  }
-];
+// const charactersData = [
+//   // Ваши данные персонажей
+//   {
+//     id: 1,
+//     name: 'Кхааса',
+//     race: 'Ящеролюд',
+//     class: 'Варвар',
+//     level: 1,
+//     experience: 0,
+//     stats: {
+//       strength: 17,
+//       durability: 12,
+//       agility: 5,
+//       intellect: 5
+//     },
+//     modifiers: {
+//       armorClass: 0,
+//       toHit: 0,
+//       spellSlots: 0
+//     },
+//     gold: 0,
+//     weapons: [
+//       { name: 'Большой топор', damage: '1d12+3', type: 'Рубящее' }
+//     ],
+//     equipment: [
+//       { name: 'Кожаный доспех', type: 'Броня' }
+//     ],
+//     inventory: [
+//       { name: 'Веревка', quantity: 1 },
+//       { name: 'Факелы', quantity: 5 }
+//     ],
+//     spells: [],
+//     quests: ['Найти древний артефакт'],
+//     notes: 'Сильный и выносливый воин',
+//     lastUpdated: new Date().toISOString()
+//   },
+//   {
+//     id: 2,
+//     name: 'Мексиагнун',
+//     race: 'Полуэльф',
+//     class: 'Маг/Таролог',
+//     level: 1,
+//     experience: 0,
+//     stats: {
+//       strength: 5,
+//       durability: 9,
+//       agility: 8,
+//       intellect: 17
+//     },
+//     modifiers: {
+//       armorClass: 0,
+//       toHit: 0,
+//       spellSlots: 0
+//     },
+//     gold: 0,
+//     weapons: [
+//       { name: 'Посох', damage: '1d6', type: 'Дробящее' }
+//     ],
+//     equipment: [
+//       { name: 'Роба мага', type: 'Одежда' }
+//     ],
+//     inventory: [
+//       { name: 'Книга заклинаний', quantity: 1 }
+//     ],
+//     spells: [
+//       { name: 'Предвидение', level: 1, slots: 1 }
+//     ],
+//     quests: ['Изучить древние пророчества'],
+//     notes: 'Мудрый маг, специализирующийся на предсказаниях',
+//     lastUpdated: new Date().toISOString()
+//   },
+//   {
+//     id: 3,
+//     name: 'Груэль',
+//     race: 'Бастанец',
+//     class: 'Вор-шептун',
+//     level: 1,
+//     experience: 0,
+//     stats: {
+//       strength: 7,
+//       durability: 9,
+//       agility: 17,
+//       intellect: 6
+//     },
+//     modifiers: {
+//       armorClass: 0,
+//       toHit: 0,
+//       spellSlots: 0
+//     },
+//     gold: 0,
+//     weapons: [
+//       { name: 'Короткий меч', damage: '1d6+3', type: 'Колющее' }
+//     ],
+//     equipment: [
+//       { name: 'Кожанка', type: 'Броня' }
+//     ],
+//     inventory: [
+//       { name: 'Отмычки', quantity: 1 }
+//     ],
+//     spells: [],
+//     quests: ['Узнать секреты гильдии воров'],
+//     notes: 'Тихий и незаметный вор',
+//     lastUpdated: new Date().toISOString()
+//   },
+//   {
+//     id: 4,
+//     name: 'Ульфост',
+//     race: 'Кхааса/Ульфен',
+//     class: 'Воин',
+//     level: 1,
+//     experience: 0,
+//     stats: {
+//       strength: 16,
+//       durability: 12,
+//       agility: 7,
+//       intellect: 4
+//     },
+//     modifiers: {
+//       armorClass: 0,
+//       toHit: 0,
+//       spellSlots: 0
+//     },
+//     gold: 0,
+//     weapons: [
+//       { name: 'Длинный меч', damage: '1d8+3', type: 'Рубящее' }
+//     ],
+//     equipment: [
+//       { name: 'Кольчуга', type: 'Броня' }
+//     ],
+//     inventory: [
+//       { name: 'Аптечка', quantity: 1 }
+//     ],
+//     spells: [],
+//     quests: ['Защищать границы королевства'],
+//     notes: 'Дисциплинированный воин',
+//     lastUpdated: new Date().toISOString()
+//   }
+// ];
 
 // Настройка статических файлов
 app.use(express.static(path.join(__dirname, 'public')));
@@ -246,10 +345,13 @@ app.get('/api/users/online', (req, res) => {
   });
 });
 
+
 app.get('/api/characters', (req, res) => {
+  const data = charactersCache.data || {};
   res.json({
-    characters: charactersData,
-    count: charactersData.length
+    characters: data,
+    count: Object.keys(data).length,
+    lastUpdated: charactersCache.lastUpdated || null
   });
 });
 

@@ -41,6 +41,7 @@ const DiceApp = (function () {
         initChatButtons();
         initLogFilters();
         initLogControls();
+        initAbilityChecks();
 
         // Настройка горячих клавиш
         initHotkeys();
@@ -1014,6 +1015,44 @@ const DiceApp = (function () {
                         document.getElementById('custom-roll-btn').click();
                     }
                     break;
+            }
+        });
+    }
+
+    // В модуле DiceApp, после других определений
+    function initAbilityChecks() {
+        const characterData = document.getElementById('character-data');
+        if (!characterData) return;
+
+        characterData.addEventListener('click', (e) => {
+            // 1. Проверка stat-block (характеристики)
+            const statBlock = e.target.closest('.stat-block');
+            if (statBlock) {
+                // Модификатор
+                const badge = statBlock.querySelector('.stat-modifier-badge');
+                if (!badge) return;
+                const modifierText = badge.textContent.trim();
+                const modifier = parseInt(modifierText.replace(/[^\d-]/g, '')) || 0;
+
+                // Название характеристики
+                const label = statBlock.querySelector('.stat-label');
+                const abilityName = label ? label.textContent.trim() : 'Характеристика';
+
+                rollDiceLocal(20, 1, modifier);
+                showNotification(`Проверка ${abilityName}: d20${modifier >= 0 ? '+' + modifier : modifier}`, 'info');
+                return;
+            }
+
+            // 2. Проверка combat-stat to-hit (атака)
+            const combatStat = e.target.closest('.combat-stat.to-hit');
+            if (combatStat) {
+                const statMain = combatStat.querySelector('.stat-main');
+                if (!statMain) return;
+                const modifierText = statMain.textContent.trim();
+                const modifier = parseInt(modifierText.replace(/[^\d-]/g, '')) || 0;
+
+                rollDiceLocal(20, 1, modifier);
+                showNotification(`Бросок атаки: d20${modifier >= 0 ? '+' + modifier : modifier}`, 'info');
             }
         });
     }
